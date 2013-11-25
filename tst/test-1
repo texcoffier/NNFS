@@ -1,0 +1,76 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test of test functions"
+
+if runA gfdgfdg
+	then
+	Exit 11
+	else
+	:
+	fi
+
+echo "www" >$H/A/a
+stamp 01 $H/A/a
+echo "www" >$H/B/a
+stamp 01 $H/B/a
+
+same $H/A a $H/B a || Exit 1
+
+stamp 02 $H/B/a
+same $H/A a $H/B a && Exit 2
+
+echo "tww" >$H/B/a
+stamp 01 $H/B/a
+same $H/A a $H/B a && Exit 3
+
+rm $H/B/a
+mkdir $H/B/a
+stamp 01 $H/B/a
+same $H/A a $H/B a && Exit 4
+
+rm $H/A/a
+mkdir $H/A/a
+stamp 01 $H/A/a
+same $H/A a $H/B a || Exit 5
+
+stamp 02 $H/A/a
+same $H/A a $H/B a && Exit 6
+
+rm -r $H/A/a $H/B/a
+
+echo "
+" >$H/B/a
+echo "
+" >$H/A/a
+stamp 02 $H/A/"
+"
+stamp 02 $H/B/"
+"
+same $H/A "
+" $H/B "
+" || Exit 7
+
+stamp 03 $H/B/"
+"
+same $H/A "
+" $H/B "
+" && Exit 8
+
+echo "*" >$H/B/a
+echo "*" >$H/A/a
+stamp 02 $H/A/"*"
+stamp 02 $H/B/"*"
+same $H/A "*" $H/B "*" || Exit 9
+
+
+mkfifo $H/A/abc $H/B/abc
+stamp 01 $H/A/abc
+stamp 01 $H/B/abc
+same $H/A abc $H/B abc || Exit 10
+
+
+Exit 0
+
+

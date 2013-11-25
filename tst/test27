@@ -1,0 +1,81 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** NON Symetric File Filtering on 3 hosts and conflicts"
+
+echo "OUTPUT_FILTER=\$OUTPUT_FILTER'
+-regex=a'" >>$H/A/.nnfs/nnfsrc
+echo "OUTPUT_FILTER=\$OUTPUT_FILTER'
+-regex=b'" >>$H/B/.nnfs/nnfsrc
+echo "OUTPUT_FILTER=\$OUTPUT_FILTER'
+-regex=c'" >>$H/C/.nnfs/nnfsrc
+
+runA -a $H/A
+runB -a $H/B
+runC -a $H/C
+
+create() {
+	echo "A "> $H/A/$1$2$3.$4
+	echo "B  "> $H/B/$1$2$3.$4
+	echo "C   "> $H/C/$1$2$3.$4
+	stamp 03 $H/$1/$1$2$3.$4
+	stamp 02 $H/$2/$1$2$3.$4
+	stamp 01 $H/$3/$1$2$3.$4
+}
+
+echO "......."
+for I in a b c ab ac bc abc
+do
+echO "*"
+create A B C $I
+create A C B $I
+create B A C $I
+create B C A $I
+create C A B $I
+create C B A $I
+done
+echO " "
+
+compare() {
+  M=$1
+  shift
+  for I in `cd $H/$M ; echo *`
+  do 
+    if [ `cat $H/$M/$I` != $1 ]
+      then
+	echo "Host $M, File=$I, Expected=$1, Real=`cat $H/$M/$I`"
+	Exit 1
+    fi 2>&1
+    shift
+  done
+  echO "+ "
+}
+
+#               ABC            ACB           BAC             BCA            CAB           CBA
+#          -------------  -------------  -------------  -------------  -------------  -------------
+#          a a a a        a a a a        a a a a        a a a a        a a a a        a a a a      
+#            b b   b b      b b   b b      b b   b b      b b   b b      b b   b b      b b   b b  
+#              c c   c c      c c   c c      c c   c c      c c   c c      c c   c c      c c   c c
+compare A  A A A A A A A  A A A A A A A  A A A A A A A  A A A A A A A  A A A A A A A  A A A A A A A
+compare B  B B B B B B B  B B B B B B B  B B B B B B B  B B B B B B B  B B B B B B B  B B B B B B B
+compare C  C C C C C C C  C C C C C C C  C C C C C C C  C C C C C C C  C C C C C C C  C C C C C C C
+
+runA
+runC
+compare C  C C C C A A A  C C C C A A A  C C C C A A A  C C C C A A A  C C C C A A A  C C C C A A A
+runA
+compare A  C C A A A A A  C C A A A A A  C C A A A A A  C C A A A A A  C C A A A A A  C C A A A A A
+runB
+compare B  B B B B A A A  B B B B A A A  B B B B A A A  B B B B A A A  B B B B A A A  B B B B A A A
+runC
+compare C  B C C B A A A  B C C B A A A  B C C B A A A  B C C B A A A  B C C B A A A  B C C B A A A
+runA
+compare A  B C A A A A A  B C A A A A A  B C A A A A A  B C A A A A A  B C A A A A A  B C A A A A A
+runC
+compare C  B C C B A A A  B C C B A A A  B C C B A A A  B C C B A A A  B C C B A A A  B C C B A A A
+runB
+compare B  B B B B A A A  B B B B A A A  B B B B A A A  B B B B A A A  B B B B A A A  B B B B A A A
+
+
+Exit 0

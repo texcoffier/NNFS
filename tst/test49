@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test file biggers than 4Gb"
+
+runA -f $H/A
+runB -a $H/B
+
+cc -Wall bigfile.c
+a.out >$H/A/bigfile
+touch $H/A/f1
+
+runA
+runB
+
+[ -f $H/B/bigfile ] && Exit 1
+same $H/A f1      $H/B f1      || Exit 2
+
+
+Exit 0
+

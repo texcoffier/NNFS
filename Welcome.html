@@ -1,0 +1,64 @@
+<HTML>
+    <HEAD>
+      <TITLE>NNFS (Non-Networked File System)</TITLE>
+    </HEAD>
+    <BODY>
+      <H1>NNFS (Non-Networked File System)</H1>
+
+
+    <H2>The goal</H2>
+    <p>
+      NNFS provide a consistent file system over several
+      non networked <b>UNIX</b> computers (or slow networked).
+      For example on your computer at home and at work
+      using only a floppy disk for the synchronisation.
+
+    <H2>The NNFS advantages</H2>
+    <UL>
+      <LI> You are sure to work on the latest version of files.
+      <LI> You don't need to remember which files are modified on
+	an host and must be transfered on others.
+      <LI> You don't need to made backup, because if a computer crash
+	the file system is still on the other computers working with NNFS.
+      <LI> The NNFS medium is choosen by a user shell script,
+	it could be: floppy disk, usb key, serial connection, ...
+      <LI> Minimal NNFS medium bandwidth to make the updates.
+      <LI> EASY TO USE: Running ``nnfs'' command before and after your work.
+      <LI> Numbered backup of files modified/deleted on NNFS.
+      <LI> If you modify the same file on several hosts
+	NNFS solves the update conflict.
+      <LI> The program has been hugely tested.
+    </UL>
+
+    <H2>Retrieve NNFS!!!</H2>
+    <P>
+      If you want more information, look the
+      <A HREF="doc/nnfs.html">user manual</A>
+    <P>
+      To download the sources:
+ <A HREF="../2.1.9.tar.gz">nnfs-2.1.9.tar.gz</A>
+    <P>
+      The <A HREF="ChangeLog">change log</A>.
+
+    <P>
+      This version of NNFS compile and run on:
+    <UL>
+      <LI> Linux (Debian): compiled, tested and used for years
+      <LI> HPUX 10.20: compiled and tested
+      <LI> IRIX: compiled and tested
+      <LI> Mac OS X: compiled, problems remaining :
+		<UL>
+		<LI> Mac OS X doesn't store the modification date
+			    of symbolics links.
+                <LI> for Mac OS X, "README" and "Readme" are
+			      the same file. So there is
+			      mirroring problems between Mac
+			      and other Unixes.
+	        </UL>
+    </UL>
+      
+
+    <HR>
+    <A HREF="mailto:Thierry.EXCOFFIER@ligim.univ-lyon1.fr">Thierry.EXCOFFIER@ligim.univ-lyon1.fr</A>
+  </BODY>
+</HTML>

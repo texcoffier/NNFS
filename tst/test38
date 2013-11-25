@@ -1,0 +1,40 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** A conflict between file (it was a directory) and a directory"
+
+
+runA -f $H/A
+
+mkdir $H/B/foo
+mkdir $H/B/bar
+mkdir $H/B/foobar
+mkdir $H/B/foobar/foobar
+
+runB -a $H/B
+
+mkdir $H/A/foo
+touch $H/A/foo/x
+mkdir $H/A/bar
+touch $H/A/bar/x
+mkdir $H/A/foobar
+mkdir $H/A/foobar/foobar
+touch $H/A/foobar/foobar/x
+
+runA
+
+rmdir $H/B/foo
+touch $H/B/foo
+rmdir $H/B/bar
+rm -r $H/B/foobar
+
+runB
+
+[ ! -f $H/B/foo/x ] && Exit 1
+[ ! -f $H/B/bar/x ] && Exit 2
+[ ! -f $H/B/foobar/foobar/x ] && Exit 3
+
+
+Exit 0
+

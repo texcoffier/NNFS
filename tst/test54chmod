@@ -1,0 +1,8 @@
+#!/bin/sh
+
+chmod 700   $H/B/afile1
+echo "x" >> $H/B/afile2
+chmod 700   $H/B/afile3
+echo "y" >> $H/B/afile4
+chmod 700   $H/B/afile5
+echo "z" >> $H/B/afile6

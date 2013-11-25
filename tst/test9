@@ -1,0 +1,40 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test add of files in the same directory on some host"
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+
+mkdir $H/A/dir
+runA
+runB
+runC
+echo a >$H/A/dir/a
+stamp 25 $H/A/dir
+echo b >$H/B/dir/b
+stamp 24 $H/B/dir
+echo c >$H/C/dir/c
+stamp 23 $H/C/dir
+
+runA
+runB
+same $H/A/dir a $H/B/dir a || Exit 100
+same $H/A dir $H/B dir || Exit 200
+runC
+same $H/A/dir a $H/C/dir a || Exit 101
+same $H/B/dir b $H/C/dir b || Exit 102
+same $H/A dir $H/C dir || Exit 201
+runA
+same $H/B/dir b $H/A/dir b || Exit 103
+same $H/C/dir c $H/A/dir c || Exit 104
+same $H/A dir $H/B dir || Exit 203
+runB
+same $H/B/dir c $H/A/dir c || Exit 105
+same $H/B dir $H/A dir || Exit 205
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

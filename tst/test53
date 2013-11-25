@@ -1,0 +1,65 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test directories with r-x mode and --- mode (with no sync allowed)"
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir "$H/A/dir1"
+touch "$H/A/dir1/file"
+touch "$H/A/dir1/file2"
+mkdir "$H/A/dir1/dir3"
+ln -s foo "$H/A/dir1/link1"
+ln -s foo "$H/A/dir1/link2"
+mkdir "$H/A/dir2"
+touch "$H/A/dir2/file"
+
+runA
+runB
+
+chmod 500 $H/A/dir1
+chmod 000 $H/A/dir2
+
+runA
+runB
+
+same $H/A dir1 $H/B dir1 || Exit 1
+same $H/A/dir1 file $H/B/dir1 file || Exit 2
+same $H/A dir2 $H/B dir2 && Exit 3 # No mirroring because 000 mode
+
+touch $H/B/dir2/file2
+runB
+runA
+same $H/A dir2 $H/B dir2 || Exit 4 # B version is newer, so mirroring come back
+same $H/A/dir2 file2 $H/B/dir2 file2 || Exit 5
+
+chmod 700 $H/A/dir1
+echo >> $H/A/dir1/file
+rm  $H/A/dir1/file2
+touch $H/A/dir1/file3
+rm -r $H/A/dir1/dir3
+rm $H/A/dir1/link1
+rm $H/A/dir1/link2
+ln -s foobar "$H/A/dir1/link2"
+mkfifo $H/A/dir1/fifo
+chmod 500 $H/A/dir1
+runA
+runB
+
+[ -f $H/B/dir1/file2 ] || Exit 6
+[ -d $H/B/dir1/dir3 ] || Exit 7
+[ -h $H/B/dir1/link1 ] || Exit 8
+samel $H/A/dir1 link2 $H/B/dir1 link2 && Exit 9
+same $H/A/dir1 file $H/B/dir1 file && Exit 10
+same $H/A/dir1 file3 $H/B/dir1 file3 && Exit 11
+same $H/A dir1 $H/B dir1 || Exit 12
+same $H/A/dir1 fifo $H/B/dir1 fifo && Exit 13
+
+
+
+
+
+Exit 0
+

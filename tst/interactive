@@ -1,0 +1,27 @@
+#!/bin/sh
+
+. init_test ""
+TRACE="*#*#9"
+DUMP=" "
+STRACE=""
+export TRACE DUMP STRACE
+rm $H/[ABCD]/.nnfs/nnfsrc
+
+( HOME=$H/A ; export HOME ; home_test A )
+( HOME=$H/B ; export HOME ; home_test B )
+( HOME=$H/C ; export HOME ; home_test C )
+
+
+I=0
+while [ $I != 10 ]
+do
+touch $H/A/a$I $H/A/h$I $H/A/g$I $H/A/f$I $H/A/e$I $H/A/d$I $H/A/c$I $H/A/b$I
+touch $H/B/_a$I $H/B/_h$I $H/B/_g$I $H/B/_f$I $H/B/_e$I $H/B/_d$I $H/B/_c$I $H/B/_b$I
+I=`expr $I + 1`
+done
+
+home_test A
+home_test B
+home_test C
+
+

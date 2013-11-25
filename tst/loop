@@ -1,0 +1,18 @@
+#!/bin/sh
+
+case "$1" in
+mount)
+	cat /bin/* 2>/dev/null | dd bs=1024 count=1000 >$2
+	echo y | mkfs $2 || Exit 1
+	insmod loop
+	mount $2 $3 -o loop || Exit 1
+	;;
+
+umount)
+	umount $3
+	rm $2
+	;;
+esac
+
+exit 0
+

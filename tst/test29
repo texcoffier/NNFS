@@ -1,0 +1,57 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test delete on hierarchy and filefilter"
+
+# I am not sure about this test.
+# It seems the comments doesn't match the code....
+# This test is now obsolete because if a directory is filtered
+# then its content is also filtered (2003/09/02)
+
+
+
+# The problem: A directory is not filtered and its content is.
+# What happen when all is deleted.
+# Files deletion do not go to the other host, directory deletion yes....
+
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir $H/B/a   $H/B/c   $H/B/a/aa     $H/B/c/cc
+touch $H/B/a/b $H/B/c/d $H/B/a/aa/aaa $H/B/c/cc/ccc
+
+
+runB
+runA
+
+# directory "a" is filtered, that implies that its content is also filtered
+# content of "c" is filtered, but "c" is not filtered
+
+echo "OUTPUT_FILTER=\"-regex=(\.(o|so|aux|log|dvi)|[~])$
+-regex=.nnfs/history/.*
+-regex=a$
+-regex=c/\"" >> $H/A/.nnfs/nnfsrc
+
+rm -r $H/A/a
+rm -r $H/A/c
+
+runA
+runB
+
+[ ! -d $H/B/a ]   && Exit 100
+# The next test has been negated.
+# It is due to comment 2003/09/02 in g_tree.c
+[ ! -f $H/B/a/b ] && Exit 102
+[   -d $H/B/c ]   && Exit 101
+[   -f $H/B/c/d ] && Exit 103
+
+Exit 0
+
+
+
+
+
+
+

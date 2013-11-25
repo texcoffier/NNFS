@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "*** Initialisations with 3 hosts, third part"
+
+TEST19=yes
+exec ./test17
+

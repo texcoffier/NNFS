@@ -1,0 +1,73 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** A conflict between files and directory with transfer error"
+
+runA -f $H/A
+runB -a $H/B
+
+# Create a score of dir and file
+
+for I in 0 1 2 3 4 5
+do
+mkdir $H/A/dir$I
+touch $H/A/dir$I/fileA
+touch $H/A/dir$I/fileB
+touch $H/A/foo$I
+done
+
+# Files are deleted before the transfer
+
+runA --exec_after_merge `pwd`/test42rm
+
+# On B create some conflicts
+# Between file and dir for 0 1
+# Normal conflict for 4 5
+
+for I in 0 1
+do
+touch $H/B/dir$I
+mkdir $H/B/foo$I
+touch $H/B/foo$I/file
+done
+for I in 4 5
+do
+touch $H/B/foo$I
+mkdir $H/B/dir$I
+touch $H/B/dir$I/file
+done
+
+runB --exec_after_merge `pwd`/test42rm2
+
+for I in 0 1 2 3 4 5
+do
+    [ ! -d $H/B/dir$I ] && Exit `expr 10 + $I`
+    [ -d $H/B/foo$I ] && Exit `expr 20 + $I`
+done
+
+[ "$H/B/dir4/file" != $H/B/*/* ] && Exit 1
+
+# Return to A but change for 0, 2 and 4
+
+for I in 0 2 4
+do
+mkdir $H/A/dir$I
+touch $H/A/dir$I/fileA
+touch $H/A/dir$I/fileB
+touch $H/A/foo$I
+done
+for I in 1 3 5
+do
+touch $H/A/dir$I
+mkdir $H/A/foo$I
+touch $H/A/foo$I/file
+done
+
+runA
+runB
+
+same_hierarchy A B || Exit 2
+
+Exit 0
+

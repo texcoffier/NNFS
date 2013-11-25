@@ -1,0 +1,133 @@
+#!/bin/sh
+
+# export NOX11=" "
+
+
+if [ `id -nu` != root ]
+	then
+	echo "This script must be run by root"
+	su -c "cd `pwd` ; $0"
+	exit
+	fi
+
+. ./init_test
+
+stop() {
+    if [ "" != "$1" ]
+	then
+	ls -ls $H/A
+	ls -ls $H/B
+	df $H/A
+	df $H/B
+	read N <number
+	N=`expr $N - 1`
+	# vi TMP/$N
+	fi
+    ./loop umount TMP/A $H/A
+    ./loop umount TMP/B $H/B
+    rm -r $H $M TMP/* >/dev/null 2>&1
+    make clean 2>/dev/null >&2
+    if [ "" != "$1" ]
+	then
+	Exit $1
+	fi
+}
+
+echo "*** Write on full filesystem"
+
+if ./loop mount TMP/A $H/A >TMP/loopA.log 2>&1
+    then
+    :
+    else
+    echo "Not possible to run this test, to run it you must have a loop device"
+    Exit 0
+    fi
+./loop mount TMP/B $H/B >TMP/loopB.log 2>&1
+
+init_rc
+
+# cat $H/B/.nnfs/nnfsrc
+
+echo 'CONFIRMATION="yes"' >>$H/A/.nnfs/nnfsrc
+cp -p  $H/A/.nnfs/nnfsrc $H/B/.nnfs/nnfsrc
+
+runA -f $H/A
+runB -a $H/B
+
+
+
+# Take all the space on A with files not copied on B
+
+I=0
+while true
+do
+    if dd bs=1024 count=50 </dev/zero >$H/A/${I}~
+    then
+    :
+    else
+    break
+    fi
+    I=`expr $I + 1`
+done 2>/dev/null >&2
+
+if [ ! -f $H/A/3~ ]
+    then
+    echo "In the 'loop' script, use a bigger file device (dd count arg)"
+    stop 1
+    fi
+
+runA
+runB
+
+# Create a file on B
+cp $H/A/1~ $H/B/file
+
+runB
+yes | runA
+if [ -f $H/A/file ]
+    then
+    stop 2
+    fi
+rm $H/A/1~
+runA
+if [ -f $H/A/file ]
+    then
+    stop 3
+    fi
+runB
+runA
+if [ ! -f $H/A/file ]
+    then
+    stop 4
+    fi
+
+
+
+cp $H/A/2~ $H/B/file2
+runB
+( sleep 2 ; rm $H/A/[234]~ ; while true ; do echo c ; done ) | runA
+if [ ! -f $H/A/file2 ]
+    then
+    stop 5
+    fi
+N=`cat number`
+N=`expr $N - 1`
+if [ `fgrep -c "Hit RETURN when problem is corrected" <TMP/${N}.` -ne 1 ]
+    then
+    stop 6
+    fi
+
+
+
+
+stop
+
+
+Exit 0
+
+
+
+
+
+
+

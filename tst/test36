@@ -1,0 +1,94 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** mode 000 directories (may fail for root or non Linux system)"
+
+runA -f $H/A
+runB -a $H/B
+
+lock_dir() {
+chmod 100 $H/$1/dir100
+chmod 400 $H/$1/dir400
+chmod 000 $H/$1/dir000 2>/dev/null || true
+}
+
+unlock_dir() {
+chmod 755 $H/$1/dir*
+}
+
+mkdir $H/B/dir000 $H/B/dir100 $H/B/dir400
+touch $H/B/dir000/file $H/B/dir100/file $H/B/dir400/file
+touch $H/B/dir100/file3
+touch $H/B/dir400/file3
+lock_dir B
+
+runB
+runA
+
+[ -d $H/A/dir000 ] && Exit 1
+[ ! -d $H/A/dir100 ] && Exit 2
+[ ! -d $H/A/dir400 ] && Exit 3
+
+unlock_dir A
+[ -f $H/A/dir100/file ] && Exit 4
+[ -f $H/A/dir400/file ] && Exit 5
+touch $H/A/dir100/file
+touch $H/A/dir400/file
+touch $H/A/dir100/file2
+touch $H/A/dir400/file2
+touch $H/A/dir100/file3
+touch $H/A/dir400/file3
+lock_dir A
+
+runA
+runB
+
+
+unlock_dir B
+[ ! -f $H/B/dir100/file ] && Exit 6
+[ ! -f $H/B/dir400/file ] && Exit 7
+[ -f $H/B/dir100/file2 ] && Exit 8
+[ -f $H/B/dir400/file2 ] && Exit 9
+
+echo new > $H/B/dir100/file
+echo new > $H/B/dir400/file
+echo new > $H/B/dir100/file2
+echo new > $H/B/dir400/file2
+rm $H/B/dir100/file3 $H/B/dir400/file3
+lock_dir B
+
+runB
+runA
+
+unlock_dir A
+[ =`cat $H/A/dir100/file` = =new ] && Exit 10
+[ =`cat $H/A/dir400/file` = =new ] && Exit 11
+[ =`cat $H/A/dir100/file2` = =new ] && Exit 12
+[ =`cat $H/A/dir400/file2` = =new ] && Exit 13
+[ ! -f $H/A/dir100/file3 ] && Exit 14
+[ ! -f $H/A/dir400/file3 ] && Exit 15
+rm $H/A/dir[14]00/file*
+touch $H/A/dir100/file4
+touch $H/A/dir400/file4
+
+runA
+runB
+
+same $H/A dir100 $H/B dir100 || Exit 100
+same $H/A dir400 $H/B dir400 || Exit 101
+same $H/A/dir100 file4 $H/B/dir100 file4 || Exit 102
+same $H/A/dir400 file4 $H/B/dir400 file4 || Exit 103
+
+[ "" != "`find $H/A -name '*:[0-9]' -print`" ] && Exit 16
+
+
+
+Exit 0
+
+
+
+
+
+
+

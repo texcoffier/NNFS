@@ -1,0 +1,24 @@
+When NNFS runs, it launch many process and pipes.
+
+USER INTERFACE (0)
+  |
+  |
+  `- MAIN PROGRAM (1)
+       |
+       |
+       +- Unsplit input (2)
+       |    |
+       |    +- One process per media (3)
+       |    |
+       |    `- Uncompress (4)
+       |
+       `- Split output (5)
+            |
+            +- One process per media (6)
+            |
+            `- Compress (7)
+
+Read pipe  : ((3)) ==> (2) ==> (4) ==>  (1)
+Write pipe :  (1)  ==> (7) ==> (5) ==> ((6))
+Medium pipe:  (2),(5) ==> (0)
+Answer pipe:  (0) ==> (1),(2),(5)

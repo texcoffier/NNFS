@@ -1,0 +1,127 @@
+#!/bin/sh
+
+. ./init_test
+
+
+truncate() {
+gzip -d <$M/exco.AAA 2>/dev/null | tr "[\000]" "[\200]" |
+awk '
+/'"$1"'/ {
+ if ( '$2' >= 0 ) print B ;
+ if ( '$2' >= 1 ) print $0 ;
+exit
+}
+{ if ( B!="" ) print B ;
+  B=$0
+}' |
+tr "[\200]" "[\000]" >xxx
+gzip <xxx >$M/exco.AAA
+rm xxx
+}
+
+
+echo "*** Error in input file (truncated)"
+
+runA -f $H/A
+runB -a $H/B
+
+echo "a content" >$H/A/a
+echo "b content" >$H/A/b
+echo "c content" >$H/A/c
+mkdir $H/A/d
+runA
+truncate "b content" +1
+
+runB
+same $H/A a $H/B a || Exit 100
+same $H/A d $H/B d || Exit 200
+[ -f $H/B/b ] && Exit 101
+[ -f $H/B/c ] && Exit 102
+
+runA
+[ ! -f $H/A/b ] && Exit 103
+[ ! -f $H/A/c ] && Exit 104
+runB
+same $H/A b $H/B b || Exit 105
+same $H/A c $H/B c || Exit 106
+echo "new a content" >$H/B/a ; stamp 01 $H/B/a
+echo "new b content" >$H/B/b ; stamp 01 $H/B/b
+echo "new c content" >$H/B/c ; stamp 01 $H/B/c
+runB
+truncate "new b content" 0
+
+runA
+same $H/A a $H/B a || Exit 107
+same $H/A b $H/B b && Exit 108
+same $H/A c $H/B c && Exit 109
+
+runB
+runA
+same $H/A b $H/B b || Exit 110
+same $H/A c $H/B c || Exit 111
+echo "New a content" >$H/B/a ; stamp 02 $H/B/a
+echo "New b content" >$H/B/b ; stamp 02 $H/B/b
+echo "New c content" >$H/B/c ; stamp 02 $H/B/c
+runB
+truncate "New b content" 0
+runA
+same $H/A a $H/B a || Exit 112
+same $H/A b $H/B b && Exit 113
+same $H/A c $H/B c && Exit 114
+
+runB
+runA
+same $H/A b $H/B b || Exit 115
+same $H/A c $H/B c || Exit 116
+
+# With symbolic link
+
+rm $H/B/b
+ln -s "new b content" $H/B/b
+echo "new new New c content" >$H/B/c ; stamp 03 $H/B/c
+runB
+truncate "new b content" 0
+runA
+same $H/A a $H/B a || Exit 122
+samel $H/A b $H/B b && Exit 123
+same $H/A c $H/B c && Exit 124
+runB
+runA
+samel $H/A b $H/B b || Exit 125
+same $H/A c $H/B c || Exit 126
+
+
+rm $H/B/b
+# The end dot is here to enlarge the file
+# Because we can't stamp a symbolic link
+ln -s "New b content." $H/B/b
+echo "new new new New c content" >$H/B/c ; stamp 04 $H/B/c
+runB
+truncate "New b content." -1
+runA
+same $H/A a $H/B a || Exit 127
+samel $H/A b $H/B b && Exit 128
+same $H/A c $H/B c && Exit 129
+runB
+runA
+samel $H/A b $H/B b || Exit 130
+same $H/A c $H/B c || Exit 131
+
+
+# Run twice on the same host
+
+echO "/ "
+echo "Twices" >$H/A/twice ; stamp 05 $H/A/twice
+runA
+truncate "Twices" 0
+runB
+[ -f $H/B/twice ] && Exit 132
+runB
+runA
+runB
+same $H/A twice $H/B twice || Exit 133
+
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

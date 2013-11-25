@@ -1,0 +1,44 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test very normal case with two hosts without remove"
+
+runA -f $H/A
+runB -a $H/B
+echo "toto" > $H/B/foo ; stamp 01 $H/B/foo
+runB
+runA
+same $H/A foo $H/B foo || Exit 1
+echo "tototo" > $H/A/foo ; stamp 02 $H/A/foo
+echo "tototi" > $H/A/bar ; stamp 03 $H/A/bar
+runA
+runB
+same $H/A foo $H/B foo || Exit 2
+same $H/A bar $H/B bar || Exit 3
+mkdir $H/B/dir-foo ; stamp 04 $H/B/dir-foo
+runB
+runA
+same $H/A dir-foo $H/B dir-foo || Exit 4
+echo "totototo" > $H/A/dir-foo/zoo ; stamp 05 $H/A/dir-foo/zoo
+echo "totototi" > $H/A/dir-foo.    ; stamp 06 $H/A/foo
+echo "tototota" > $H/A/dir-foo_    ; stamp 07 $H/A/foo
+runA
+runB
+same $H/A/dir-foo zoo      $H/B/dir-foo zoo      || Exit 5
+same $H/A         dir-foo. $H/B         dir-foo. || Exit 6
+same $H/A         dir-foo_ $H/B         dir-foo_ || Exit 7
+same $H/A dir-foo $H/B dir-foo || Exit 8
+echo "tototot5" > $H/A/dir-foo/bee ; stamp 09 $H/A/dir-foo/bee
+stamp 08 $H/A/dir-foo
+runA
+runB
+
+same $H/A/dir-foo bee      $H/B/dir-foo bee      || Exit 9
+same $H/A dir-foo $H/B dir-foo || Exit 10
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+
+Exit 0
+

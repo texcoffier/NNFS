@@ -1,0 +1,28 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Strange file names"
+
+for_names() {
+	for N in " " "  " "   " "	" "		" "
+" "*" "?"
+	do
+	# echo "(($N))"
+	eval "$1"
+	done
+	}
+
+
+runA -f $H/A
+runB -a $H/B
+
+for_names 'echo "(($N)) content" > "$H/A/$N"'
+runA
+runB
+for_names 'same $H/A "$N" $H/B "$N" || Exit 100'
+
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

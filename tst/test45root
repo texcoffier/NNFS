@@ -1,0 +1,38 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test a problem with impossible copy in a protected directory"
+
+runA -f $H/A
+runB -a $H/B
+mkdir $H/A/dir
+echo 555555 >$H/A/dir/file1
+runA
+runB
+
+
+echo ff >$H/A/dir/file1
+runA
+
+echo ffff >$H/B/dir/file1
+./Chown lp $H/B/dir $H/B/dir/file1
+# The copy is not possible
+runB
+
+./Chown `id -nu` $H/B/dir $H/B/dir/file1
+echo ggg >$H/B/dir/file1
+
+# The B version should be copied on A
+runB
+runA
+
+
+same $H/A/dir file1 $H/B/dir file1 || Exit 1
+
+runA
+runB
+
+
+Exit 0
+

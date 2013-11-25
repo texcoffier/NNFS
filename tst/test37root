@@ -1,0 +1,79 @@
+#!/bin/sh
+
+if [ `id -nu` != root ]
+	then
+	echo "This script must be run by root"
+	su -c "cd `pwd` ; $0"
+	exit
+	fi
+
+echo "*** Mirroring of UID and GID with rootnnfs2"
+
+if [ ! -x ../src/rootnnfs2 ]
+    then
+    echo "This test can't be done because you haven't compiled rootnnfs2"
+    echo "To compile : 'make rootnnfs'  WITHOUT THE '2'"
+    exit 0
+    fi
+
+. ./init_test
+
+NNN=1
+RUN() {
+ HOME=$H/$1
+ export HOME
+ echo -e "$NNN \c"
+ ../src/rootnnfs2 "*#*#9" "g_Analyse#*#0" "g_Ui_Txt#*#0" --dump --no-x11 --host $1 $2 >TMP/$NNN 2>&1
+ NNN=`expr $NNN + 1`
+}
+RA() { RUN A "$*" ; }
+RB() { RUN B "$*" ; }
+
+touch $H/A/lp ; chown lp $H/A/lp
+touch $H/A/root
+touch $H/A/lp_sys ; chown lp $H/A/lp_sys ; chgrp sys $H/A/lp_sys
+chmod 7550 $H/A/lp_sys
+
+mkdir $H/A/dir ; chown mail $H/A/dir ; chgrp daemon $H/A/dir
+
+# Symbolic link
+ln -s afile $H/A/.sl
+chown man $H/A/.sl ; chgrp adm $H/A/.sl
+
+
+# Verify initial copy
+
+RA -f $H/A
+RB -a $H/B
+RA
+RB
+
+ls -lsRa $H/[AB]
+
+
+for I in `cd $H/A ; echo [!.]*`
+do
+same $H/A $I $H/B $I || Exit 4
+done
+
+samel_and_uidgid $H/A .sl $H/B .sl || Exit 41
+
+
+# Verify that the UID/GID change are synchronized
+
+chown root $H/B/[!.]*
+chgrp root $H/B/[!.]*
+
+RB
+RA
+
+for I in `cd $H/A ; echo [!.]*`
+do
+same $H/A $I $H/B $I || Exit 5
+done
+
+rm -r $H $M TMP/* 2>/dev/null >&2
+make clean 2>/dev/null >&2
+
+Exit 0
+

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** A conflict between files and directory (with 3 hosts)"
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+
+touch $H/A/file
+runA
+
+mkdir $H/B/file
+mkdir $H/B/file/dir
+touch $H/B/file/file
+runB
+
+[ -d $H/B/file ] && Exit 1
+[ ! -f $H/B/file ] && Exit 2
+
+
+mkdir $H/C/file
+touch $H/C/file/file
+touch $H/C/file/file2
+echo | runC
+if fgrep "RETURN" <TMP/6. >/dev/null
+    then
+    Exit 22
+    fi
+
+[ -d $H/C/file ] && Exit 3
+[ ! -f $H/C/file ] && Exit 4
+
+
+Exit 0
+

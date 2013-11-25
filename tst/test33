@@ -1,0 +1,52 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test a strange real case: truncated medium and filtered files"
+
+runA -f $H/A
+runB -a $H/B
+
+# Create a filtered file
+
+echo "barbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbar" >$H/A/bar.o
+echo "foofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoo" >$H/A/foo.o
+
+runA
+runB
+
+# Now the files become non filtered on A
+
+echo '
+OUTPUT_FILTER="-regex=(\.(so|aux|log|dvi)|[~])$
+-regex=^\.nnfs/history/.*"' >>$H/A/.nnfs/nnfsrc
+runA
+
+# The copy fail for "foo.o"
+
+gzip -d <$M/exco.AAA >TMP/xxx
+S=`wc -c <TMP/xxx`
+S=`expr $S - 10`
+dd bs=1 count=$S <TMP/xxx 2>/dev/null | gzip >$M/exco.AAA
+rm TMP/xxx
+
+runB
+[ ! -f $H/B/bar.o ] && Exit 1
+[ -f $H/B/foo.o ] && Exit 2
+
+runA
+runB
+
+[ ! -f $H/B/foo.o ] && Exit 3
+
+
+
+
+Exit 0
+
+
+
+
+
+
+

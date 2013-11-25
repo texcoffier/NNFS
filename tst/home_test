@@ -1,0 +1,42 @@
+#!/bin/sh
+# To interactively test NNFS2 on 2 hosts.
+
+A="$1"
+shift
+B="$*"
+
+
+help() {
+    (
+    echo "Arguments may be :"
+    echo "  - init                 Initialise hosts A and B"
+    echo "  - A                    Run on A"
+    echo "  - B                    Run on B"
+    echo "  - C                    Run on C"
+    echo "  - D                    Run on D"
+    echo "home directories are $H/A, $H/B, ..."
+    ) >&2
+    exit 1
+    }
+
+export DUMP=" "
+export TRACE=" "
+export NOX11="--no-x11"
+export STRACE="valgrind --trace-children=no --leak-check=full --show-reachable=yes"
+
+case "$A" in
+  "init") . init_test ""
+	  # echo "ASK_MEDIUM=no" >>$H/A/.nnfs/nnfsrc
+	  # echo "ASK_MEDIUM=no" >>$H/B/.nnfs/nnfsrc
+	  runA -a $H/A ; runB -a $H/B ;;
+  "A") . init_test "no init" ; runA $B ;;
+  "B") . init_test "no init" ; runB $B ;;
+  "C") . init_test "no init" ; runC $B ;;
+  "D") . init_test "no init" ; runD $B ;;
+  *) . init_test "no init" ; help ;;
+esac
+
+exit 0
+
+ 
+

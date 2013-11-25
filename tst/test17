@@ -1,0 +1,60 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Initialisations with 3 hosts"
+
+for I in A B C
+do
+touch $H/$I/On_$I
+touch $H/$I/On_$I.bis
+mkdir $H/$I/$I.dir_old
+mkdir $H/$I/$I.dir_new
+mkdir $H/$I/$I.dir_empty
+touch $H/$I/$I.file
+touch $H/$I/$I.dir_old/file_old
+touch $H/$I/$I.dir_new/file_new
+
+stamp 02 $H/$I/$I.dir_old
+stamp 01 $H/$I/$I.dir_old/file_old
+
+for J in A B C
+do
+if [ $J = $I ] ; then continue ; fi
+touch $H/$J/On_$I ; stamp 04 $H/$J/On_$I
+mkdir $H/$J/On_$I.bis ; stamp 05 $H/$J/On_$I.bis
+touch $H/$J/$I.dir_old
+touch $H/$J/$I.dir_new ; stamp 06 $H/$J/$I.dir_new
+mkdir $H/$J/$I.dir_empty
+touch $H/$J/$I.dir_empty/$J
+stamp 07 $H/$J/$I.dir_empty
+done
+done
+
+runA -f $H/A
+runB -a $H/B
+if [ "" != "$TEST18" ]
+	then
+	runA
+	fi
+if [ "" != "$TEST19" ]
+	then
+	runA
+	runB
+	fi
+runC -a $H/C
+runA
+runB
+runC
+
+( cd $H/A ; ls -lsR ) >xxx
+( cd $H/B ; ls -lsR ) >yyy
+( cd $H/C ; ls -lsR ) >zzz
+diff xxx yyy || Exit 100
+diff xxx zzz || Exit 101
+
+Exit 0
+
+
+
+

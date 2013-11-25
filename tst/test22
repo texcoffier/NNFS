@@ -1,0 +1,96 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** A conflict bug"
+
+touch $H/A/file
+mkdir $H/A/empty_dir
+mkdir $H/A/normal_dir
+touch $H/A/normal_dir/file
+touch $H/A/deleted_file
+mkdir $H/A/deleted_dir
+touch $H/A/deleted_dir/file
+mkdir $H/A/dirdir
+mkdir $H/A/dirdir/dir
+touch $H/A/dirdir/dir/filedirdir
+mkdir $H/A/dir_deleted
+mkdir $H/A/dir_deleted/dir
+touch $H/A/dir_deleted/dir/file5
+
+touch $H/A/file_fcA
+mkdir $H/A/empty_dir_coA
+mkdir $H/A/change_on_A_normal_dir
+touch $H/A/change_on_A_normal_dir/file
+mkdir $H/A/normal_dir_fcA
+touch $H/A/normal_dir_fcA/file_change_on_A
+
+touch $H/A/file_fcB
+mkdir $H/A/empty_dir_coB
+mkdir $H/A/change_on_B_normal_dir
+touch $H/A/change_on_B_normal_dir/file
+mkdir $H/A/normal_dir_fcB
+touch $H/A/normal_dir_fcB/file_change_on_B
+
+touch $H/A/file_fcAB
+mkdir $H/A/empty_dir_coAB
+mkdir $H/A/change_on_AB_normal_dir
+touch $H/A/change_on_AB_normal_dir/file
+mkdir $H/A/normal_dir_fcAB
+touch $H/A/normal_dir_fcAB/file_change_on_AB
+
+runA -f $H/A
+runB -a $H/B
+runA
+runB
+
+( cd /tmp/NNFShome/A ; ls -lsR ) >xxx
+( cd /tmp/NNFShome/B ; ls -lsR ) >yyy
+if diff xxx yyy
+	then
+	:
+	else
+	Exit 100
+	fi
+
+stamp 01 $H/A/file_fcA
+stamp 02 $H/B/file_fcB
+stamp 03 $H/A/file_fcAB
+stamp 04 $H/B/file_fcAB
+stamp 05 $H/A/empty_dir_coA
+stamp 06 $H/B/empty_dir_coB
+stamp 07 $H/A/empty_dir_coAB
+stamp 08 $H/B/empty_dir_coAB
+stamp 09 $H/A/change_on_A_normal_dir
+stamp 10 $H/B/change_on_B_normal_dir
+stamp 11 $H/A/change_on_AB_normal_dir
+stamp 12 $H/B/change_on_AB_normal_dir
+stamp 13 $H/A/normal_dir_fcA/file_change_on_A
+stamp 14 $H/B/normal_dir_fcB/file_change_on_B
+stamp 15 $H/A/normal_dir_fcAB/file_change_on_AB
+stamp 16 $H/B/normal_dir_fcAB/file_change_on_AB
+stamp 17 $H/B/dirdir/dir/file
+rm -rf $H/A/deleted* $H/A/dirdir
+
+runC -a $H/C
+runA
+runB
+yes | runA
+
+( cd /tmp/NNFShome/A ; ls -lsR ) >xxx
+( cd /tmp/NNFShome/B ; ls -lsR ) >yyy
+if diff xxx yyy
+	then
+	:
+	else
+	Exit 104
+	fi
+
+runC
+stamp 18 $H/B/dir_deleted/dir/file5
+runB
+rm -r $H/A/dir_deleted
+runA
+[ ! -f $H/A/dir_deleted/dir/file5 ] && Exit 199
+
+Exit 0

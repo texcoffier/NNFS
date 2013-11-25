@@ -1,0 +1,71 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test very normal case with several hosts without remove"
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+runD -a $H/D
+
+echo "o" > $H/A/a ; stamp 01 $H/A/a
+echo "p" > $H/B/b ; stamp 02 $H/B/b
+echo "q" > $H/C/c ; stamp 03 $H/C/c
+echo "r" > $H/D/d ; stamp 04 $H/D/d
+
+runA
+runB
+same $H/A a $H/B a || Exit 1
+runC
+same $H/A a $H/C a || Exit 2
+same $H/B b $H/C b || Exit 3
+runD
+same $H/A a $H/D a || Exit 4
+same $H/B b $H/D b || Exit 5
+same $H/C c $H/D c || Exit 6
+runA
+same $H/B b $H/A b || Exit 7
+same $H/C c $H/A c || Exit 8
+same $H/D d $H/A d || Exit 9
+runB
+same $H/C c $H/B c || Exit 10
+same $H/D d $H/B d || Exit 11
+runC
+same $H/D d $H/C d || Exit 12
+
+echo "o2" > $H/A/d ; stamp 05 $H/A/d
+echo "p2" > $H/B/c ; stamp 06 $H/B/c
+echo "q2" > $H/C/b ; stamp 07 $H/C/b
+echo "r2" > $H/D/a ; stamp 08 $H/D/a
+
+runD
+runC
+same $H/D a $H/C a || Exit 13
+runA
+same $H/D a $H/A a || Exit 14
+same $H/C b $H/A b || Exit 15
+runD
+same $H/C b $H/D b || Exit 16
+same $H/A d $H/D d || Exit 17
+runC
+same $H/A d $H/C d || Exit 18
+
+echo "r3" > $H/A/a ; stamp 09 $H/A/a
+runA
+runB
+same $H/A a $H/B a || Exit 18
+same $H/A b $H/B b || Exit 19
+same $H/A d $H/B d || Exit 21
+runA
+same $H/A c $H/B c || Exit 22
+runC
+same $H/A a $H/C a || Exit 23
+same $H/A c $H/C c || Exit 24
+runD
+same $H/D a $H/C a || Exit 25
+same $H/D c $H/C c || Exit 26
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

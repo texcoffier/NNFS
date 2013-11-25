@@ -1,0 +1,29 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test is NNFS works with a bad history directory"
+
+if [ $(id -u) = 0 ]
+then
+exit 0
+fi
+
+runA -f $H/A
+runB -a $H/B
+
+echo "AAAAAAAAAA" > $H/A/f
+
+runA
+runB
+
+# rmdir $H/B/.nnfs/history
+ln -s /usr/nnfstest $H/B/.nnfs/history
+echo "BBBBBBBB" > $H/A/f
+
+runA
+runB
+
+same $H/A f $H/B f || Exit 1
+
+Exit 0

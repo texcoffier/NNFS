@@ -1,0 +1,29 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** A conflict between files and directory (another)"
+
+unset DUMP || true
+
+runA -f $H/A
+
+touch $H/B/foo
+
+runB -a $H/B
+
+
+mkdir $H/A/foo
+touch $H/A/foo/x
+
+runA
+
+[ -d $H/A/foo ] && Exit 1
+
+if fgrep "writeErr=10" <TMP/3 >/dev/null
+    then
+    Exit 2
+    fi
+
+Exit 0
+

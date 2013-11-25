@@ -1,0 +1,217 @@
+#!/bin/sh
+
+set -e
+set -a
+export LANG=C
+export PATH="$PATH:."
+H=/tmp/NNFShome			# HOME
+M=/tmp/NNFSmedium		# MEDIUM
+TOP=`pwd`/..
+set +a
+
+stamp() { touch -t 01${1}0101 "$2" ; }
+
+init_rc() {
+    for I in A B C D
+    do
+      mkdir $H/$I/.nnfs 2>/dev/null || true
+#      ln -s $HOME/.Xauthority $H/$I
+      
+      cat >$H/$I/.nnfs/nnfsrc <<%
+   COMPRESS_FILTER="gzip"
+ UNCOMPRESS_FILTER="gzip -fd"
+       READ_MEDIUM="cat $M/%"
+      WRITE_MEDIUM="cat >$M/%"
+             EJECT="echo '%' >>$M/ejected"
+       MEDIUM_SIZE="1400000"
+       OUTPUT_FILTER="-regex=(\.(o|so|aux|log|dvi)|[~])$
+-regex=^\.nnfs/history/.*"
+       HISTORY_DIR="history/%Y_%m/%d_%H:%M.%S"
+       MEDIUM_NAME="exco"
+         HISTORIZE="no"
+        ASK_MEDIUM="no"
+      CONFIRMATION="never"
+          TMP_FILE="none"
+           COMMENT="test"
+        AUTO_START="no"
+              CASE="test"
+    COPY_HARD_LINK="no"
+ CROSS_MOUNT_POINT="no"
+MODE_CHANGE_SENSITIVE="yes"
+ SYNC_READONLY_DIR="no"
+%
+      stamp 22 $H/$I/.nnfs/nnfsrc
+      stamp 23 $H/$I/.nnfs
+      stamp 24 $H/$I
+    done
+}
+
+if [ "`echo -e 5`" = 5 ]
+	then
+	Echo() { echo -e $* ; }
+else
+	Echo() { echo $* ; }
+fi
+echO() { echo -n "$*" ; }
+
+#
+#
+#
+  Exit() {
+    A=$1
+    if [ "$A" = "" ]
+    then
+      A=255
+    fi
+    if [ $A != 0 ]
+    then
+      echo "$0 ------------- Error $A -------------"
+      if [ $A = 1 ]
+      then
+	( tail `ls -t TMP | grep "^[0-9]" | ( read X ; read Y ; echo TMP/$X )` ;
+	tail `ls -t TMP | grep "^[0-9]" | ( read X ; read Y ; echo TMP/$Y )` ) |
+	sed "s/^/---/"
+      fi
+    else
+      echo "$0 OK"
+    fi
+    exit $A
+}
+
+#
+# If no arguments, initialize $H and $M
+#
+
+if [ "" = "$1" ]
+  then
+#	unset DISPLAY || true
+    mkdir $H $M 2>/dev/null || true
+    for I in $H $M
+    do
+      if [ -d $I ]
+      then
+	# Chown -Rf `logname` $I
+        chmod 777 $I $I/* $I/*/* $I/*/*/* $I/*/*/*/* 2>/dev/null >&2 || true
+	rm -rf $I
+      fi
+      mkdir $I
+    done
+    for I in A B C D
+    do
+      mkdir $H/$I
+   done    
+    init_rc
+    echo 1 >number
+    I=0
+
+fi
+
+
+run()    {
+	   I=`cat number`
+	   echO "$I "
+	   HOME=$H/$2
+	   export HOME
+	   set +e
+	   if true
+	   then
+	   # set -x
+	    eval $STRACE $TOP/src/nnfs2 ${DUMP:---dump} ${NOX11:---no-x11} \
+			 "g_Analyse#*#0" \
+                         "g_Ui_Txt#*#0" \
+			    ${TRACE:-"*#*#9"} \
+			    $* 2>$TOP/tst/TMP/$I >$TOP/tst/TMP/$I.
+	   R=$?
+           # set +x
+	   else
+	     echo run ${DUMP:---dump} ${NOX11:---no-x11} \
+	      "g_Analyse#*#0" \
+	      "g_Ui_Txt#*#0" \
+	      ${TRACE:-"*#*#9"} \
+	      $* " 2>$TOP/tst/TMP/$I >$TOP/tst/TMP/$I." >TMP/gdb
+	    gdb -x TMP/gdb $TOP/src/nnfs2 </dev/tty
+	   R=$?
+	   fi
+
+  awk <$TOP/tst/TMP/$I 'BEGIN                            { IN = 1 ; }
+  /(g_Compile_Filter|g_Eval_Filter) START/               { IN = 1 ; }
+  IN==0 && /From Checker/   { print "Line : " FNR ; exit(1) ; }
+  /(g_Compile_Filter|g_Eval_Filter) END/ || /is running/ { IN = 0 ; }' >>$TOP/tst/TMP/$I
+  S=$?
+  if [ $S -eq 1 ]
+        then
+	  R=1
+	  echo "Checker error" 2>>$TOP/tst/TMP/$I
+	  fi
+   set -e
+   [ -f $M/`id -nu`.AAA ] && cp $M/`id -nu`.AAA $M/`id -nu`.$I
+   expr $I + 1 >number
+   return $R
+}
+same()   {
+	 if [ -f "$1/$2" -a -f "$3/$4" -o -d "$1/$2" -a -d "$3/$4" -o -p "$1/$2" -a -p "$3/$4" ]
+	 then
+	 if [ -d "$1/$2" ]
+	    then
+	    # The pipe remove the directory size (it could be different
+	    # even if the directories are identicals
+	    # On Mac OS X : The number of hard link of a directory
+	    # is the number of files in the directory !!!!!
+	    # So we remove it.
+        if [ `uname` = "Darwin" ]
+	then
+            F1=`cd "$1" ; ls -lsd "$2" | awk '{ if ( $2 == "drwxr-xr-x" ) print$1 $2 $4 $5 $7 $8 $9 $10 ; }'`   
+            F2=`cd "$3" ; ls -lsd "$4" | awk '{ if ( $2 == "drwxr-xr-x" ) print$1 $2 $4 $5 $7 $8 $9 $10 ; }'`   
+        else
+	    F1=`cd "$1" ; ls -lsd "$2" | awk '{ if ( $2 == "drwxr-xr-x" ) print $1 $2 $3 $4 $5 $7 $8 $9 $10 ; }'`
+	    F2=`cd "$3" ; ls -lsd "$4" | awk '{ if ( $2 == "drwxr-xr-x" ) print $1 $2 $3 $4 $5 $7 $8 $9 $10 ; }'`
+	    fi
+	    else
+	    F1=`cd "$1" ; ls -lsd "$2"`
+	    F2=`cd "$3" ; ls -lsd "$4"`
+	    fi
+	   [ "$F1" = "$F2" ] &&
+	   if [ -f "$1/$2" ]
+	   then
+	     if cmp -s "$1/$2" "$3/$4"
+	     then
+	       true
+	     else
+	       false
+	     fi
+	   else
+	     true
+	   fi
+	 else
+	   false
+	 fi
+	 }
+samel()   {
+  F1=`ls -ls "$1/$2" | sed 's/.*->//'`
+  F2=`ls -ls "$3/$4" | sed 's/.*->//'`
+  [ "$F1" = "$F2" ]
+}
+samel_and_uidgid() {
+  FL1=`cd "$1" ; ls -lsd "$2" | ( read N C NL LUID LGID O ; echo $LUID $LGID )`
+  FL2=`cd "$3" ; ls -lsd "$4" | ( read N C NL LUID LGID O ; echo $LUID $LGID )`
+  samel $* && [ "$FL1" = "$FL2" ]
+}
+runA()   { run --host A $* ; }
+runB()   { run --host B $* ; }
+runC()   { run --host C $* ; }
+runD()   { run --host D $* ; }
+
+same_hierarchy() {
+NNN=""
+for I in $*
+do
+	( cd $H/$I ; ls -lsR ) |
+	sed -e "s/[0-9][0-9]:[0-9][0-9] .*->/####&/" \
+	    -e "s/####.....//" -e "s/.*log~//" \
+            -e "s/^total [0-9]*$//g" \
+        >$M/$I
+        NNN="$NNN $M/$I"
+done
+diff $NNN
+}
+

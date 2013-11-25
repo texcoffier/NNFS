@@ -1,0 +1,81 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Symetric File Filtering on 3 hosts"
+
+F='OUTPUT_FILTER="-size=+4c"
+'
+
+echo "$F" >>$H/A/.nnfs/nnfsrc
+echo "$F" >>$H/B/.nnfs/nnfsrc
+echo "$F" >>$H/C/.nnfs/nnfsrc
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+
+echo a >$H/A/f1
+echo bb >$H/A/f2
+echo ccc >$H/A/f3
+echo dddd >$H/A/f4
+echo a >$H/A/F1
+echo bb >$H/A/F2
+echo ccc >$H/A/F3
+echo dddd >$H/A/F4
+runA
+runB
+[ ! -f $H/B/f1 ] && Exit 100
+[ ! -f $H/B/f2 ] && Exit 101
+[   -f $H/B/f3 ] && Exit 102
+[   -f $H/B/f4 ] && Exit 103
+runC
+[ ! -f $H/C/f1 ] && Exit 104
+[ ! -f $H/C/f2 ] && Exit 105
+[   -f $H/C/f3 ] && Exit 106
+[   -f $H/C/f4 ] && Exit 107
+
+echo AAAA >$H/C/f1
+echo B >$H/C/f2
+echo CCCC >$H/C/f3
+echo D >$H/C/f4
+runC
+runB
+same $H/B f2 $H/C f2 || Exit 108
+same $H/B f4 $H/C f4 || Exit 109
+same $H/B f1 $H/C f1 && Exit 110
+same $H/B f3 $H/C f3 && Exit 111
+
+echo B- >$H/B/f2
+echo D--- >$H/B/f4
+echo A- >$H/B/f1
+echo C--- >$H/B/f3
+
+runB
+runA
+same $H/A f1 $H/B f1 || Exit 112
+same $H/A f2 $H/B f2 || Exit 123
+same $H/A f3 $H/B f3 && Exit 124
+same $H/A f4 $H/B f4 && Exit 125
+
+echo AAAA >$H/A/g1
+echo B >$H/A/g2
+echo CCCC >$H/A/g3
+echo D >$H/A/g4
+runA
+runC
+
+same $H/A g2 $H/C g2 || Exit 126
+same $H/A g4 $H/C g4 || Exit 127
+same $H/A g1 $H/C g1 && Exit 128
+same $H/A g3 $H/C g3 && Exit 129
+
+runA
+same $H/A f4 $H/C f4 && Exit 130
+same $H/B f4 $H/C f4 && Exit 131
+same $H/B f2 $H/C f2 || Exit 132
+same $H/B f1 $H/C f1 || Exit 133
+same $H/B f3 $H/C f3 && Exit 134
+
+
+
+Exit 0

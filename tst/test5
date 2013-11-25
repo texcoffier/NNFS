@@ -1,0 +1,101 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test very normal case with several hosts with remove"
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+runD -a $H/D
+
+echo "o" > $H/A/a ; stamp 01 $H/A/a
+echo "p" > $H/A/b ; stamp 02 $H/A/b
+echo "q" > $H/A/c ; stamp 03 $H/A/c
+echo "r" > $H/A/d ; stamp 04 $H/A/d
+mkdir $H/A/e
+echo "r" > $H/A/e/a ; stamp 05 $H/A/e/a
+ln -s value1 $H/A/e/b
+mkdir $H/A/f
+echo "r" > $H/A/f/a ; stamp 06 $H/A/f/a
+ln -s value2 $H/A/f/b
+
+runA
+runB
+runC
+runD
+
+same $H/A a $H/D a || Exit 10
+same $H/A b $H/D b || Exit 11
+same $H/A c $H/D c || Exit 12
+same $H/A d $H/D d || Exit 13
+same $H/A/e a $H/D/e a || Exit 14
+samel $H/A/e b $H/D/e b || Exit 15
+same $H/A/f a $H/D/f a || Exit 16
+samel $H/A/f b $H/D/f b || Exit 17
+
+rm $H/A/a
+rm $H/B/e/a
+rm $H/C/f/b
+
+runC
+runB
+[ -f $H/B/f/b ] && Exit 2
+
+runA
+[ -f $H/A/f/b ] && Exit 3
+[ -f $H/A/e/a ] && Exit 4
+
+runD
+[ -f $H/D/f/b ] && Exit 5
+[ -f $H/D/e/a ] && Exit 6
+[ -f $H/D/a ] && Exit 7
+
+runC
+[ -f $H/C/e/a ] && Exit 8
+[ -f $H/C/a ] && Exit 9
+
+runB
+[ -f $H/C/a ] && Exit 10
+
+chmod 777 $H/B/e
+runB
+runC
+same $H/B e $H/C e || Exit 100
+
+# the -f is here for Mac OS X it thinks that the remove
+# is not allowed !!!
+rm -rf $H/B/e
+rm -r $H/C/f
+runB
+[ -d $H/B/e ] && Exit 110
+runC
+[ -d $H/B/e ] && Exit 111
+[ -d $H/C/e ] && Exit 11
+
+runD
+[ -d $H/B/e ] && Exit 112
+[ -d $H/D/e ] && Exit 12
+[ -d $H/D/f ] && Exit 13
+
+runA
+[ -d $H/B/e ] && Exit 113
+[ -d $H/A/e ] && Exit 14
+[ -d $H/A/f ] && Exit 15
+
+echo "p" > $H/A/e ; stamp 22 $H/A/e
+runA
+[ -d $H/B/e ] && Exit 114
+runB
+same $H/A e $H/B e || Exit 16
+
+# Some link are historized because they keep bouncing on Mac OS X
+[ -d $H/A/.nnfs/history -a ! `uname` = "Darwin" ] && Exit 250
+
+# This test was valid before the 02/11/2002 (g_update.c), no more longer true.
+# I don't know why
+# [ -d $H/B/.nnfs/history -a ! `uname` = "Darwin" ] && Exit 251
+
+[ ! -d $H/C/.nnfs/history ] && Exit 252
+[ ! -d $H/D/.nnfs/history ] && Exit 253
+Exit 0

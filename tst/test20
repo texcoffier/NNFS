@@ -1,0 +1,53 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Update Conflicts, two hosts, regular files"
+
+runA -f $H/A
+runB -a $H/B
+
+echo "a" >$H/A/a ; stamp 01 $H/A/a
+echo "b" >$H/B/a ; stamp 02 $H/B/a
+echo "aa" >$H/A/aa ; stamp 06 $H/A/aa
+echo "bb" >$H/B/aa ; stamp 05 $H/B/aa
+
+runA
+runB
+
+same $H/A a $H/B a || Exit 100
+[ "a" != "`cat $H/B/a`" ] && Exit 101
+[ ! -f $H/B/.nnfs/history/*/*/a ] && Exit 102
+[ "b" != "`cat $H/B/.nnfs/history/*/*/a`" ] && Exit 103
+
+same $H/A aa $H/B aa || Exit 110
+[ "aa" != "`cat $H/B/aa`" ] && Exit 111
+[ ! -f $H/B/.nnfs/history/*/*/aa ] && Exit 112
+[ "bb" != "`cat $H/B/.nnfs/history/*/*/aa`" ] && Exit 113
+
+runA
+
+[ -d $H/A/.nnfs/history ] && Exit 114
+same $H/A a $H/B a || Exit 115
+same $H/A aa $H/B aa || Exit 116
+rm -r $H/B/.nnfs/history
+
+rm $H/A/a
+rm $H/B/aa
+echo "aaa" >$H/A/aa
+echo "bbb" >$H/B/a
+
+runA
+runB
+
+[ -f $H/B/a ] && Exit 130
+[ ! -f $H/B/.nnfs/history/*/*/a ] && Exit 131
+[ "bbb" != "`cat $H/B/.nnfs/history/*/*/a`" ] && Exit 132
+[ ! -f $H/B/aa ] && Exit 133
+same $H/A aa $H/B aa || Exit 134
+
+runA
+same $H/A aa $H/B aa || Exit 135
+[ -f $H/A/a ] && Exit 136
+
+Exit 0

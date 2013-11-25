@@ -1,0 +1,53 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test FIFO"
+
+runA -f $H/A
+runB -a $H/B
+
+mkfifo $H/A/f1 $H/A/f2 $H/A/f3 $H/A/f4 $H/A/f5
+runA
+touch $H/B/f2
+mkdir $H/B/f3
+touch $H/B/f3/file
+ln -s /tmp $H/B/f4
+runB
+
+[ ! -p $H/B/f1 ] && Exit 1
+[ ! -p $H/B/f2 ] && Exit 2
+[ ! -p $H/B/f3 ] && Exit 3
+[ ! -p $H/B/f4 ] && Exit 4
+
+same $H/A f1 $H/B f1 || Exit 5
+same $H/A f2 $H/B f2 || Exit 6
+same $H/A f3 $H/B f3 || Exit 7
+same $H/A f4 $H/B f4 || Exit 8
+
+rm $H/B/f2
+rm $H/B/f3
+echo 5555 >$H/B/f3 ; stamp 01 $H/B/f3
+rm $H/B/f4
+mkdir $H/B/f4
+echo 2 >$H/B/f4/foo ; stamp 01 $H/B/f4/foo
+
+rm $H/B/f5
+mkfifo $H/B/f5 ; stamp 01 $H/B/f5
+
+runB
+
+rm $H/A/f1 $H/A/f5
+
+runA
+
+[ -f $H/A/f1 ] && Exit 9
+[ -f $H/A/f2 ] && Exit 10
+same $H/A f3 $H/B f3 || Exit 11
+same $H/A/f4 foo $H/B/f4 foo || Exit 12
+same $H/A f5 $H/B f5 || Exit 13
+
+
+
+Exit 0
+

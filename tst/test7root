@@ -1,0 +1,47 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test load problems (can't create local file)"
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+
+touch $H/A/a ; stamp 01 $H/A/a
+runA
+runB
+echo change >$H/B/a
+runB
+./Chown root $H/A $H/A/a # Could not be overwrote
+yes | runA                   # a is not updated
+
+if [ `id -u` -eq 0 ]
+    then
+    echo "This test can't be done under root"
+    Exit 0
+    fi
+
+runC                   # a can't go on C
+[ -f $H/C/a ] && Exit 100
+runB
+[ ! -f $H/B/a ] && Exit 101
+runC                   # a on C is updated
+
+same $H/B a $H/C a || Exit 102
+echo change2 >$H/B/a
+runB
+yes | runA
+runA
+runB
+[ ! -f $H/B/a ] && Exit 103
+runC
+
+same $H/B a $H/C a || Exit 104
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+
+su -c "rm -rf $H/A 2>/dev/null || true"
+
+Exit 0

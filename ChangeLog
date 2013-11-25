@@ -1,0 +1,95 @@
+2.1.8 ===> 2.1.9 (2006/02/02)
+	Fix the case where MODE_CHANGE_SENSITIVE==no and a file mode
+	is modified while NNFS is running.
+
+2.1.7 ===> 2.1.8 (2005/10/26 ===> 2005/10/31)
+	Configuration can now be saved with GTK 2.6 GUI
+	Directory with mode r-x can now be synchronized without write error
+	The default option is to not synchronize r-w directory content
+	
+2.1.6 ===> 2.1.7 (2005/04/24 ===> 2005/05/10)
+	Error reporting fix (patch from Alexander Bergolth)
+	Remove compilation warnings from gcc 3.3.5
+	Enhance test11 and test46 to make it work on fast hosts
+	Add some information about the MEDIUM_SIZE limitation to 2Gb
+	NNFSRC: Add erasing of the files on the medium before writing on it
+	
+2.1.5 ===> 2.1.6 (2004/02/12 ===> 2004/02/26)
+	GUI changed : more information displayed on files in a sortable table.
+	Add the option "mode_change_sensitive".
+	Graphic interface use now GTK 2.
+	Some Makefile cleanup.
+	
+2.1.4 ===> 2.1.5 (2003/12/14 ===> 2003/12/14)
+	Fix "core dump" when "stat" call fails, e.g.: file bigger than 4Gb
+	Beware, these files are not mirrored.
+
+2.1.3 ===> 2.1.4 (2003/09/01 ===> 2003/09/03)
+	Files in a filtered directory are now filtered (it was a small bug)
+	Add a python script to change the version number
+
+2.1.2 ===> 2.1.3 (2003/02/12 ===> 2003/03/02)
+	Fix default "nnfsrc" to historize modified files.
+	Add "-lm" to the linking options.
+	Fix some error messages.
+	Regression test are made a little more portable
+	The Valgrind checker found no real problem in NNFS :-)
+	The code seems stable so the debugging code is disabled.
+	And the compiler optimizer option is added.
+	Fix some compiler warning when compiled with optimization.
+	Increase the maximum number of: files per directories and hosts
+
+2.1.1 ===> 2.1.2 (2002/04/08 ===> 2002/12/14)
+	BEWARE, ATTENTION: File format is not compatible with former version,
+	you should reformat your medium with the new version.
+	GTK User interface: all hosts aliases are no more on the same line.
+	NNFS was broken when used with files from 1jan1970 first 2 seconds.
+	Local file can now win the conflict if the remote one can't win it,
+	it is the case when the local file can't be modified (02/11/2002)
+	The process calling the GTK nnfs is no more killed on "Quit".
+	Some bad dependencies in the Makefile are removed
+	Graphical configuration should now work (saving where bugged).
+	Mirroring of FIFO file is now possible.
+	The mirroring was not done when the medium file can't be read,
+	even if the medium file is the same than the local file (test47)
+
+2.1.0 ===> 2.1.1 (2002/03/24 ===> 2002/03/25)
+	Typing "make clean" in "tst" as "root" make your system UNUSABLE
+	Copy of UID and GID of symbolic links if possible (lchown syscall)
+	Copy of UID and GID of newly created directories
+
+2.0.9 ===> 2.1.0 (2002/03/05 ===> 2002/03/10)
+	New options: copy hard link as regular files, do not cross mount point
+	Now it can be compiled without debugging code
+	Now the copyright page is really visible
+
+2.0.8 ===> 2.0.9 (2002/01/17 ===> 2002/03/01)
+	The short option -x wasn't supported.
+	Correct some minor errors in help messages.
+	Minor update in the user manual.
+	In both user interfaces, update errors are made more visible.
+	Remove the error message when skiping medium.
+	Error messages are far more verbose.
+	The mirroring of 's' mode bits was not done in "rootnnfs2"
+	A huge memory leak was corrected in GTK interface
+
+2.0.8   (2002/01/10)
+	Release of a mature application with the exception of
+	the GTK interface that is new.
+
+2.0.0   (1998/04/05)
+	The program is now in C and more powerful,
+	but this version and following where not released because too hard
+	to use and not yet a finished product.
+	Nevertheles I use it 8 times a day without any problems.
+
+1.5	(1996/05/09)
+	Last version of the shell scripts.
+
+1       (1995/07/22)
+	It was a bunch of shell scripts.
+
+
+
+	
+

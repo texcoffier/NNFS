@@ -1,0 +1,537 @@
+#!/bin/sh
+
+. ./init_test
+unset TRACE || true
+
+echo 'MEDIUM_SIZE="20"
+   COMPRESS_FILTER="cat"
+ UNCOMPRESS_FILTER="cat"
+       OUTPUT_FILTER="-regex=(\.(o|so|aux|log|dvi)|[~])$
+-regex=\.nnfs/history/.*
+-regex=\.nnfs/nnfsrc"' >> $H/A/.nnfs/nnfsrc
+
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+
+echo "*** Create an NNFS on multiple medium (FAIL if not compiled with DEBUG)"
+
+if [ `id -un` != exco ]
+    then
+    echo "This test work only if your username is exco"
+    Exit 0
+    fi
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+touch $H/A/file
+
+runA -f $H/A
+
+
+[ "`fgrep 'asked medium' TMP/1 | sed 's/.*exco.//'`" != "AAA
+AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS" ] && Exit 100
+
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+exco.AAS" ] && Exit 101
+
+
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+echo "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNMqazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLPza" >$H/A/file
+rm $M/ejected
+
+runA
+
+[ ! -f $M/ejected  ] && echo "=== EJECT not used" && Exit 10
+[ ! -f $M/exco.AAA ] && echo "=== exco.AAA not created" && Exit 11
+[ ! -f $M/exco.AAB ] && echo "=== exco.AAB not created" && Exit 12
+[ ! -f $M/exco.ABB ] && echo "=== exco.ABB not created" && Exit 13
+
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+---
+exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+exco.AAS
+exco.AAT
+exco.AAU
+exco.AAV
+exco.AAW
+exco.AAX
+exco.AAY
+exco.AAZ
+exco.ABA
+exco.ABB" ] && Exit 102
+
+[ "`fgrep 'asked medium' TMP/2 | sed 's/.*exco.//'`" != "AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAA
+AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS
+AAT
+AAU
+AAV
+AAW
+AAX
+AAY
+AAZ
+ABA
+ABB" ] && Exit 103
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+# Test error on reading medium
+# The medium must be asked once more
+
+rm $M/ejected
+rm $M/exco.AAZ
+ln -s /non-existent $M/exco.AAZ
+cat >>$H/A/.nnfs/nnfsrc <<%
+      ASK_MEDIUM=yes
+      READ_MEDIUM='N=$M/% ; if [ -f \$N. ] ; then echo o ; exit 0 ; fi ; cat <\$N ; X=\$? ; rm \$N ; touch \$N. ; exit \$X'
+%
+
+(
+for I in AAB AAC AAD AAE AAF AAG AAH AAI AAJ AAK AAL AAM AAN AAO AAP AAQ AAR AAS AAT AAU AAV AAW AAX AAY AAZ
+	    do
+	    echo
+	    done
+        echo cancel
+	I=0
+	while [ $I != 100 ] ; do echo "" ; I=`expr $I + 1` ; done
+) >xxx
+runA <xxx
+
+# This is not quit the good answer.
+# It a so special case : one host.
+
+
+[ "`fgrep 'asked medium' TMP/3 | sed 's/.*exco.//'`" != "AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS
+AAT
+AAU
+AAV
+AAW
+AAX
+AAY
+AAZ
+AAZ
+AAA
+AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS" ] && Exit 104
+
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+exco.AAS
+exco.AAT
+exco.AAU
+exco.AAV
+exco.AAW
+exco.AAX
+exco.AAY
+---
+---
+exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+exco.AAS" ] && Exit 105
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+
+# Test error on writing medium
+# The medium must be asked once more
+
+rm $M/ejected
+cat >>$H/A/.nnfs/nnfsrc <<%
+      ASK_MEDIUM=yes
+      WRITE_MEDIUM='cat >$M/% ; X=\$? ; if [ \$X != 0 ] ; then rm $M/% ; fi ; exit \$X'
+      READ_MEDIUM='N=$M/% ;cat \$N ; if [ % = exco.AAN ] ; then rm \$N ; ln -s / \$N ; fi ; exit 0'
+	TMP_FILE=memory
+%
+
+while true ; do echo ; done | runA
+
+[ "`fgrep 'asked medium' TMP/4 | sed 's/.*exco.//'`" != "AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS
+AAA
+AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS" ] && Exit 106
+
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+---
+exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+---
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+exco.AAS" ] && Exit 107
+
+
+
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+# Test error when reading medium
+# The medium must be asked once more
+
+rm $M/ejected
+mv $M/exco.AAL $M/exco.AAL.old
+
+cat >>$H/A/.nnfs/nnfsrc <<%
+      READ_MEDIUM='N=$M/% ;cat \$N ; X=$? ; if [ -f \$N.old ] ; then mv \$N.old \$N ; fi ; exit \$X'
+%
+
+awk 'BEGIN { for(i=0;i<100;i++) print "" ; }' >TMP/retry
+runA <TMP/retry
+
+
+[ "`fgrep 'asked medium' TMP/5 | sed 's/.*exco.//'`" != "AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS
+AAA
+AAB
+AAC
+AAD
+AAE
+AAF
+AAG
+AAH
+AAI
+AAJ
+AAK
+AAL
+AAM
+AAN
+AAO
+AAP
+AAQ
+AAR
+AAS" ] && Exit 108
+
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+---
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+---
+exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK
+exco.AAL
+exco.AAM
+exco.AAN
+exco.AAO
+exco.AAP
+exco.AAQ
+exco.AAR
+exco.AAS" ] && Exit 109
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+
+echo "*** Uncompress Error reporting "
+
+
+echo "
+UNCOMPRESS_FILTER='exit 1'
+TMP_FILE=
+ASK_MEDIUM=no" >>$H/A/.nnfs/nnfsrc
+HOME=$H/A
+export HOME
+
+
+$TOP/src/nnfs2 -config -host A 2>/dev/null >/dev/null && Exit 15
+
+
+
+Exit 0
+

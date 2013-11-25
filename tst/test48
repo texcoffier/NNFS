@@ -1,0 +1,31 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test some filename and filter with ~"
+
+runA -f $H/A
+runB -a $H/B
+
+
+
+mkdir $H/A/~
+mkdir $H/A/~/d1
+touch $H/A/~/d1/f1
+# mkdir $H/A/d2
+# mkdir $H/A/d2/~
+# mkdir $H/A/d2/~/d3
+# touch $H/A/d2/~/d3/f2
+
+runA
+runB
+
+
+[ "" != "`fgrep 'NNFS: Error' TMP/4`" ] && Exit 99
+
+[ -d $H/B/~ ] && Exit 100 
+# [ -d $H/B/d2/~ ] && Exit 100 
+
+
+Exit 0
+

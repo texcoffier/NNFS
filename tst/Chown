@@ -1,0 +1,2 @@
+echo "Type root password"
+su -c "chown $*"

@@ -1,0 +1,66 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Update Conflicts, two hosts, and conflict with files and directories"
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir $H/A/dir-a $H/B/dir-b $H/A/dir-a/dir-aa $H/B/dir-b/dir-bb
+touch $H/A/dir-b $H/B/dir-a $H/A/dir-a/dir-aa/filea $H/B/dir-b/fileb
+stamp 01 $H/A/dir-a/dir-aa/filea
+stamp 02 $H/A/dir-a/dir-aa
+stamp 03 $H/A/dir-a
+stamp 04 $H/B/dir-b/dir-bb
+stamp 05 $H/B/dir-b/fileb
+stamp 06 $H/B/dir-b
+stamp 07 $H/A/dir-b
+stamp 08 $H/B/dir-a
+
+mkdir $H/A/aaa $H/A/aaa/bbb
+touch $H/A/aaa/bbb/ccc
+
+runA
+runB
+
+[ ! -d $H/B/dir-a ] && Exit 100
+[ ! -d $H/B/dir-a/dir-aa ] && Exit 101
+[ ! -f $H/B/dir-a/dir-aa/filea ] && Exit 102
+[ ! -f $H/B/dir-b ] && Exit 103
+# [ ! -f $H/B/dir-b/fileb ] && Exit 104
+# [ ! -d $H/B/dir-b/dir-bb ] && Exit 105
+[ ! -f $H/B/.nnfs/history/*/*/dir-a ] && Exit 106
+
+stamp 03 $H/A/aaa/bbb/ccc
+rm -r $H/B/aaa
+
+# yes because interface ask a question (mkdir failed)
+yes | runA
+
+
+# [ ! -f $H/A/.nnfs/history/*/*/dir-b ] && Exit 107
+
+A=`cd $H/A ; ls -lsR [!a]*`
+B=`cd $H/B ; ls -lsR [!a]*`
+[ "$A" != "$B" ] && Exit 116
+
+chmod 777 $H/B/dir-a
+chmod 757 $H/A/dir-a
+
+runB
+
+[ ! -f $H/B/aaa/bbb/ccc ] && Exit 117
+same $H/A aaa $H/B aaa || Exit 118
+same $H/A/aaa bbb $H/B/aaa bbb || Exit 119
+same $H/A/aaa/bbb ccc $H/B/aaa/bbb ccc || Exit 120
+
+runA
+
+same $H/A aaa $H/B aaa || Exit 121
+same $H/A/aaa bbb $H/B/aaa bbb || Exit 122
+same $H/A/aaa/bbb ccc $H/B/aaa/bbb ccc || Exit 123
+same $H/A dir-a $H/B dir-a || Exit 124
+
+
+Exit 0

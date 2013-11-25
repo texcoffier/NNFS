@@ -1,0 +1,33 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test save problems (can't read local file to save it)"
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+
+echo booboo >$H/A/a ; stamp 01 $H/A/a
+runA
+runB
+chmod 000 $H/B/a
+./Chown lp $H/B/a # no change on file but it can't be read
+runB
+runC
+same $H/A a $H/C a && Exit 101
+runC
+runA
+runC
+same $H/A a $H/C a && Exit 102
+rm -f $H/B/a
+echo booboo2 >$H/B/a ; stamp 09 $H/B/a
+runB
+runC
+same $H/B a $H/C a || Exit 103
+runA
+same $H/A a $H/C a || Exit 104
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

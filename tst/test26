@@ -1,0 +1,77 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Symetric File Filtering on 3 hosts, conflicts of -f"
+
+F='OUTPUT_FILTER="-size=+3c"
+'
+
+echo "$F" >>$H/A/.nnfs/nnfsrc
+echo "$F" >>$H/B/.nnfs/nnfsrc
+echo "$F" >>$H/C/.nnfs/nnfsrc
+
+create() {
+         echo $4 >$H/$1/$1$2$3.$I.$J.$K
+         echo $5 >$H/$2/$1$2$3.$I.$J.$K
+         echo $6 >$H/$3/$1$2$3.$I.$J.$K
+	 stamp 03 $H/$1/$1$2$3.$I.$J.$K
+	 stamp 02 $H/$2/$1$2$3.$I.$J.$K
+	 stamp 01 $H/$3/$1$2$3.$I.$J.$K
+}
+
+echO '........'
+for I in a aa
+do
+   for J in b bb
+   do
+      for K in c cc
+         do
+	 echO '*'
+	 create A B C $I $J $K
+	 create A C B $I $J $K
+	 create B A C $J $I $K
+	 create B C A $J $K $I
+	 create C A B $K $I $J
+	 create C B A $K $J $I
+         done
+   done
+done
+
+for I in `cd $H/A ; echo *`
+do
+case $I in
+A??.a.*.*) ABC="$ABC $I" ;;
+B??.*.b.*) ABC="$ABC $I" ;;
+C??.*.*.c) ABC="$ABC $I" ;;
+A??.*.*.*) ALL_DIFF="$ALL_DIFF $I" ;;
+B??.*.*.*) ALL_DIFF="$ALL_DIFF $I" ;;
+C??.*.*.*) ALL_DIFF="$ALL_DIFF $I" ;;
+*) echo $I
+esac
+done
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+runA
+runB
+runC
+
+echO "................................................"
+for I in $ABC
+do
+	echO "*"
+	same $H/A $I $H/B $I || Exit 1
+	same $H/A $I $H/C $I || Exit 2
+done
+for I in $ALL_DIFF
+do
+	echO "*"
+	same $H/A $I $H/B $I && Exit 3
+	same $H/A $I $H/C $I && Exit 4
+	same $H/B $I $H/C $I && Exit 5
+done
+
+
+Exit 0

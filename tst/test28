@@ -1,0 +1,35 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Setuid/SetGid bit"
+
+runA -f $H/A
+runB -a $H/B
+
+(
+cd $H/B
+
+for I in 1777 2777 4777 7777
+do
+touch a$I
+chmod $I a$I
+done
+)
+
+runB
+runA
+
+for I in `cd $H/B ; echo *`
+do
+	same $H/A $I $H/B $I || ( echo $I ; Exit 1 )
+done
+
+Exit 0
+
+
+
+
+
+
+

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test very normal case with symbolic links without remove"
+
+runA -f $H/A
+runB -a $H/B
+
+ln -s val1 $H/A/ls
+mkdir $H/A/dir-foo
+ln -s val2 $H/A/dir-foo/ls
+runA
+runB
+samel $H/A ls  $H/B ls || Exit 1
+samel $H/A/dir-foo ls  $H/B/dir-foo ls || Exit 2
+
+rm $H/A/ls
+ln -s val1.new $H/A/ls
+rm $H/B/dir-foo/ls
+ln -s val2.new $H/B/dir-foo/ls
+runA
+runB
+runA
+samel $H/A ls  $H/B ls || Exit 3
+samel $H/A/dir-foo ls  $H/B/dir-foo ls || Exit 4
+
+
+mkdir $H/B/dir-foo2
+ln -s ../dir-foo2 $H/B/dir-foo/l
+
+runB
+runA
+samel $H/A/dir-foo l $H/B/dir-foo l || Exit 5
+
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

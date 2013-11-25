@@ -1,0 +1,168 @@
+dnl
+dnl configure script for NNFS2
+dnl
+
+AC_INIT(Makefile.in)
+
+dnl
+dnl Search programs
+dnl
+
+AC_CHECK_PROG(GZIP,gzip,"yes","no")
+AC_CHECK_PROG(GTKCONFIG,pkg-config,"yes","no")
+test "$GTKCONFIG" = "yes" && pkg-config --exists gtk+-2.0 || GTKCONFIG="no"
+
+dnl
+dnl
+dnl
+
+AC_PROG_CC
+AC_C_CONST
+test "$CC" = "gcc" && CFLAGS="$CFLAGS -Wall -pedantic"
+
+dnl
+dnl
+dnl
+
+AC_STDC_HEADERS
+AC_HEADER_DIRENT
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(stdlib.h)
+AC_CHECK_HEADERS(string.h)
+AC_CHECK_HEADERS(strings.h)
+AC_CHECK_HEADERS(stdarg.h)
+AC_CHECK_HEADERS(limits.h)
+AC_CHECK_HEADERS(time.h)
+AC_CHECK_HEADERS(utime.h)
+AC_CHECK_HEADERS(errno.h)
+AC_CHECK_HEADERS(regex.h,regex=1,OTHER_O="$OTHER_O regex.o")
+AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(signal.h)
+dnl AC_CHECK_HEADERS(getopt.h)
+AC_CHECK_HEADERS(pwd.h)
+AC_CHECK_HEADERS(sys/stat.h)
+AC_CHECK_HEADERS(sys/types.h)
+AC_CHECK_HEADERS(sys/vfs.h)
+AC_CHECK_HEADERS(sys/statfs.h)
+dnl For HPUX
+AC_CHECK_HEADERS(dirent.h)
+
+dnl
+dnl Search functions
+dnl
+
+AC_FUNC_STRFTIME
+AC_FUNC_ALLOCA
+AC_TYPE_SIGNAL
+AC_FUNC_UTIME_NULL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNC(getdomainname, AC_DEFINE(HAVE_GETDOMAINNAME))
+AC_CHECK_FUNC(regcomp, regcomp=1 ; AC_DEFINE(HAVE_REGCOMP), OTHER_O="$OTHER_O regex.o")
+AC_CHECK_FUNC(getopt_long,CFLAGS="$CFLAGS -DHAVE_GETOPT_H", OTHER_O="$OTHER_O getopt.c getopt1.c")
+AC_CHECK_FUNCS(strchr memcpy gethostname mkdir re_comp rmdir select strdup strtol lchown)
+
+dnl On HP, need _INCLUDE_POSIX_SOURCE to define "struct stat"
+
+AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/stat.h>], [struct stat fs ;], AC_DEFINE(DO_NOT_NEED_INCLUDE_POSIX_SOURCE) ,AC_DEFINE(_HPUX_SOURCE) AC_DEFINE(_HIUX_SOURCE) AC_DEFINE(__STDC__))
+AC_CHECK_FUNCS(alphasort)
+
+dnl
+dnl
+dnl
+
+AC_TYPE_MODE_T
+AC_TYPE_PID_T
+AC_TYPE_UID_T
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+AC_C_CONST
+
+dnl
+dnl GTK
+dnl
+
+
+test "$GTKCONFIG" = "yes" &&
+	LIBS="$LIBS `pkg-config gtk+-2.0 --libs`" CFLAGS="$CFLAGS `pkg-config gtk+-2.0 --cflags`"
+
+dnl Use GTK only if the install seems to work
+
+AC_TRY_COMPILE([#include <gtk/gtk.h>], [int argc ; char *argv[]={""} ; gtk_init(&argc, &argv);], AC_DEFINE(HAVE_GTK_INIT) OTHER_O="$OTHER_O g_ui_gtk.o")
+
+dnl Compatility with older GTK version
+
+
+dnl
+dnl
+dnl
+
+AC_TRY_COMPILE([#include <sys/statfs.h>], [struct statfs fs ; fs.f_bavail ;], AC_DEFINE(HAVE_F_BAVAIL))
+AC_TRY_COMPILE([#include <sys/vfs.h>], [struct statfs fs ; fs.f_bavail ;], AC_DEFINE(HAVE_F_BAVAIL))
+
+AC_TRY_COMPILE([#include <sys/statfs.h>], [struct statfs fs ; statfs("/", &fs);], AC_DEFINE(HAVE_STATFS2))
+AC_TRY_COMPILE([#include <sys/vfs.h>], [struct statfs fs ; statfs("/", &fs);], AC_DEFINE(HAVE_STATFS2))
+
+AC_TRY_COMPILE([#include <sys/statfs.h>], [struct statfs fs ; statfs("/", &fs, sizeof(fs), 0);], AC_DEFINE(HAVE_STATFS3))
+AC_TRY_COMPILE([#include <sys/vfs.h>], [struct statfs fs ; statfs("/", &fs, sizeof(fs), 0);], AC_DEFINE(HAVE_STATFS3))
+
+AC_EGREP_HEADER(.*const[ 	]*struct[ 	]*dirent.*,dirent.h, AC_DEFINE(HAVE_DIRENT_CONST))
+
+dnl
+dnl Does the symbolic links have a modification date ?
+dnl It is not the case on Mac OS X
+dnl The test, change the directory time and look if
+dnl the link time has changed.
+
+AC_TRY_RUN([
+#include <unistd.h>
+#include <sys/stat.h>
+
+int main()
+{
+struct stat dir, slink ;
+
+symlink("foobar", "foobar.link") ;
+sleep(1) ;
+symlink("foobar", "foobar.link2") ;
+
+lstat(".", &dir) ;
+lstat("foobar.link", &slink) ;
+
+unlink("foobar.link") ;
+unlink("foobar.link2") ;
+return( dir.st_mtime != slink.st_mtime ) ;
+}
+], echo "Symbolic links have the modification time of their parent", AC_DEFINE(HAVE_LINK_MTIME) echo "Symbolic links have modification time", AC_DEFINE(HAVE_LINK_MTIME) echo "I suppose that Symbolic links have modification time")
+
+dnl
+dnl
+dnl
+
+AC_SUBST(CFLAGS)
+AC_SUBST(CC)
+AC_SUBST(DEFS)
+AC_SUBST(LIBS)
+AC_SUBST(OTHER_O)
+
+
+
+
+AC_OUTPUT(Makefile)
+
+make depend
+
+test "$GZIP" = "no" &&
+	 ERRORS="$ERRORS
+===> No 'gzip', default 'nnfsrc' will not work"
+test "$regex" != "$regcomp" &&
+	 ERRORS="$ERRORS
+===> The GNU regex will be used (Header or Library missing)"
+
+test "" != "$ERRORS" &&
+	echo "
+*******************************************************************************
+*                                WARNINGS
+*******************************************************************************
+$ERRORS"

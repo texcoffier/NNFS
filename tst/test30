@@ -1,0 +1,46 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Same as test29 but transform as symbolic link in place of deleting"
+
+# The problem: A directory is not filtred and its content is.
+# What happen when all is deleted.
+# Files deletion do not go to the other host, directory deletion yes....
+
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir $H/B/a   $H/B/c   $H/B/a/aa     $H/B/c/cc
+touch $H/B/a/b $H/B/c/d $H/B/a/aa/aaa $H/B/c/cc/ccc
+
+
+runB
+runA
+
+echo "OUTPUT_FILTER=\"-regex=.*(\.(o|so|aux|log|dvi)|[~])$
+-regex=.nnfs/history/.*
+-regex=\./a$
+-regex=\./c/\"" >> $H/A/.nnfs/nnfsrc
+
+rm -r $H/A/a
+rm -r $H/A/c
+ln -s / $H/A/a
+ln -s / $H/A/c
+
+runA
+runB
+
+[ ! -d $H/B/a ]   && Exit 100
+[   -f $H/B/a/b ] && Exit 102
+[ ! -L $H/B/c ]   && Exit 101
+
+Exit 0
+
+
+
+
+
+
+

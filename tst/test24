@@ -1,0 +1,90 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Symetric File Filtering"
+
+F='OUTPUT_FILTER="-regex=^f$
+-regex=/*a$
++type=f size=+1k
+-perm=707
+-perm=+001 regex=permplus
+-type=l
++type=l size=+2c
+-type=d regex=/*filtred_dir$"
+'
+
+echo "$F" >>$H/A/.nnfs/nnfsrc
+echo "$F" >>$H/B/.nnfs/nnfsrc
+runA -f $H/A
+runB -a $H/B
+
+touch $H/A/f
+touch $H/A/ff
+mkdir $H/A/dir $H/A/dir2
+echo "333" > $H/A/a
+touch $H/A/dir/a
+cp test23 $H/A/dir2/a
+touch $H/A/perm707 ; chmod 707 $H/A/perm707
+touch $H/A/perm717 ; chmod 717 $H/A/perm717
+touch $H/A/perm700 ; chmod 700 $H/A/perm700
+touch $H/A/permplus707 ; chmod 707 $H/A/permplus707
+touch $H/A/permplus770 ; chmod 770 $H/A/permplus770
+ln -s / $H/A/link1
+ln -s /. $H/A/link11
+
+runA
+runB
+
+[   -f $H/B/f ] && Exit 100
+[ ! -f $H/B/ff ] && Exit 101
+[   -f $H/B/a ] && Exit 102
+[   -f $H/B/dir/a ] && Exit 103
+[ ! -f $H/B/dir2/a ] && Exit 104
+[   -f $H/B/perm707 ] && Exit 105
+[ ! -f $H/B/perm717 ] && Exit 106
+[ ! -f $H/B/perm700 ] && Exit 107
+[   -f $H/B/permplus707 ] && Exit 108
+[ ! -f $H/B/permplus770 ] && Exit 109
+[   -d $H/B/link1 ] && Exit 110
+[ ! -d $H/B/link11 ] && Exit 111
+
+cp test11 $H/B/f	# This one can be copied >1024byte
+echo sdf >$H/B/a
+mkdir $H/B/dir/a
+echo df >$H/B/perm707	# This one can be copied permission OK (not 707)
+touch $H/B/link1	# This one can be copied because it is a file
+
+runB
+runA
+
+same $H/A f $H/B f || Exit 112
+same $H/A perm707 $H/B perm707 || Exit 113
+same $H/A link1 $H/B link1 || Exit 114
+same $H/A a $H/B a && Exit 115
+same $H/A/dir a $H/B/dir a && Exit 116
+
+chmod 644 $H/A/permplus707
+rm $H/A/dir/a
+ln -s /. $H/A/link2
+sleep 1
+ln -s / $H/B/link2
+mkdir $H/A/filtred_dir
+mkdir $H/A/filtred_dir/subdir
+echo gh > $H/A/filtred_dir/subdir/file
+rm $H/A/link1
+ln -s / $H/A/link1
+
+runA
+yes | runB
+
+samel $H/A link1 $H/B link1 && Exit 214
+same $H/A permplus707 $H/B permplus707 || Exit 117
+[ ! -f $H/B/a ] && Exit 118
+samel $H/A link2 $H/B link2 || Exit 119
+[ -d $H/B/filtred_dir ] && Exit 120
+[ -f $H/B/filtred_dir ] && Exit 120
+[ -d $H/B/filtred_dir/subdir ] && Exit 121
+[ -f $H/B/filtred_dir/subdir/file ] && Exit 122
+
+Exit 0

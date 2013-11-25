@@ -1,0 +1,184 @@
+#!/bin/sh
+# -*- ksh -*-
+
+. ./init_test
+
+trap 'trap "" 0 1 2 ; echo STOP ; kill `cat xxx.pids` ; kill -1 `cat xxx.pids` ; Exit 0' 2
+
+
+rm TMP/* 2>/dev/null || true
+
+# set -x
+prob() { X=$RANDOM
+         test `expr $X % 100` -lt $1
+ }
+content() {
+ X=`expr 10 + \( $1 % 100 \)`
+ expr substr "$2##########################################################################################################################" 1 $X
+} 
+
+an_user() {
+RANDOM=$1
+set +e
+while true
+do
+   for F in . ? ?/? ?/?/?
+   do
+	case $F in
+	"?"*) continue ;;
+	esac
+
+	if prob 5
+		then
+		if [ $F != . ]
+			then
+			echo "Delete $F"
+			rm -rf $F || true
+			fi
+		continue
+		fi
+	if prob 20
+		then
+			if [ -f $F ]
+				then
+				echo "Modify $F"
+                                content ${RANDOM} $F >$F || true
+			else
+				if [ -L $F ]
+					then
+					echo "Mod.Lk $F"
+					rm -f $F || true
+                                        X=${RANDOM}
+					ln -s `content $X $F` $F || true
+					fi
+				fi
+			continue
+		fi
+	if prob 100
+		then
+		if [ ! -d $F ]
+			then
+			continue
+			fi
+		X=$RANDOM
+		N="$F/`expr $X % 5 + 1`"
+		if [ -f $N -o -d $N -o -L $N ]
+			then
+			continue
+			fi
+		if prob 50
+			then
+			echo "Create File $N"
+			content $RANDOM $N >$N || true
+		else
+		if prob 90
+			then
+			echo "Create Dir $N"
+			mkdir $N || true
+		else
+			echo "Create Link $N"
+			X=${RANDOM}
+			ln -s `content $X $N` $N || true
+		fi
+		fi
+		continue
+		fi
+	done
+done
+}
+
+runA -f $H/A
+runB -a $H/B
+runC -a $H/C
+runD -a $H/D
+
+
+terminate() {
+kill    `cat xxx.pids` >/dev/null 2>&1 || true
+kill -1 `cat xxx.pids` >/dev/null 2>&1 || true
+
+for I in A B C D C B A B C D
+do
+echo -e "$I\c"
+while true ; do echo ; done |
+../../src/nnfs2 --no-x11 --host $I "*#*#9" "g_Ui_Txt#*#0" --dump >&2
+
+if fgrep g_Ask_User_To_Free_Disk_Space <xxx.err >/dev/null
+  then
+    echo "NNFS ASKS QUESTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    Exit 1
+  fi
+
+echo "
+
+" >&2
+done 2>xxx.err
+echo
+trap '' 0 1 2
+same_hierarchy A B || Exit 2
+same_hierarchy B C || Exit 2
+same_hierarchy C D || Exit 2
+
+Exit 0
+}
+
+X=`pwd`/TMP/xxx.pids
+export X
+(
+echo >$X
+cd $H/A
+an_user $RANDOM &
+echo $! >>$X
+cd $H/B
+an_user $RANDOM &
+echo $! >>$X
+cd $H/C
+an_user $RANDOM &
+echo $! >>$X
+cd $H/D
+an_user $RANDOM &
+echo $! >>$X
+) >TMP/xxx 2>&1
+
+# renice 10 `cat TMP/xxx.pids` >/dev/null
+
+OPTIONS=''
+OPTIONS='*#*#9 g_Ui_Txt#*#0 --dump'
+
+N=0
+cd TMP
+while true
+	do
+	X=$RANDOM
+	case `expr $X % 4` in
+	0) HO=A ;;
+	1) HO=B ;;
+	2) HO=C ;;
+	3) HO=D ;;
+	esac
+	echo -n "$HO"	
+	export HO
+	O=`expr $N \% 10` || true
+	rm -f exco.$O
+	[ -f exco.AAA ] && mv exco.AAA exco.$O
+	cp /tmp/NNFSmedium/exco.AAA exco.AAA || true
+	while true ; do echo ; done | if ../../src/nnfs2 --no-x11 --host $HO $OPTIONS >$O. 2>$O
+		then
+		:
+		else
+		echo "    NNFS HAD A BIG PROBLEM"
+		kill `cat xxx.pids`
+		trap '' 0 1 2
+		Exit 1
+		fi
+        if fgrep g_Ask_User_To_Free_Disk_Space <$O >/dev/null
+	   then
+           echo -e "/\c"
+	   terminate
+           fi
+	N=`expr $N + 1`
+	expr $N \% 80 >/dev/null || rm -rf /tmp/NNFShome/*/.nnfs/history
+	done
+
+	
+

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test file not synchronization on change mode only"
+
+echo "MODE_CHANGE_SENSITIVE=no
+" >>$H/A/.nnfs/nnfsrc
+
+runA -f $H/A
+runB -a $H/B
+
+echo "content" >$H/A/f1
+
+runA
+runB
+same $H/A f1 $H/B f1  || Exit 1
+
+chmod 700 $H/B/f1
+runB
+runA
+same $H/A f1 $H/B f1  && Exit 2
+
+Exit 0
+

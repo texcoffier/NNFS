@@ -1,0 +1,90 @@
+#######################################################################
+# DO NOT EDIT
+#######################################################################
+# I think you should not edit this file.
+# Run "./configure" script, and, may be, patch the Makefile
+#######################################################################
+
+include ../Version
+
+
+# Uncomment to include all debugging informations and memory checkers
+# DEBUG="-DG_DEBUG"
+
+CFLAGS=-O $(OTHER_CFLAGS) @CFLAGS@ $(DEBUG) -DNNFS_VERSION=\"Version:$(V)\" @DEFS@
+
+OBJ=g_nnfs.o g_update.o g_merge.o g_file.o g_dir.o g_option.o \
+	g_init.o g_header.o g_tree.o g_ui.o g_ui_txt.o \
+	g_openp.o g_filter.o \
+	g_host.o g_help.o g_unix.o g_finish.o g_histo.o\
+	g_read.o g_state.o g_trim.o g_dspbar.o g_report.o \
+        g_secure.o g_debug.o g_malloc.o g_nnfsrc.o g_copy.o g_split.o @OTHER_O@
+
+
+nnfs2:$(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) @LIBS@ -lm -o $@
+	@echo
+	@echo 'To verify if NNFS2 is working you can go in 'tst' and run "tests"'
+	@echo
+	@echo 'Copy "nnfs2" (or "rootnnfs2") executable where you want'
+
+rootnnfs:
+	-rm *.o
+	$(MAKE) rootnnfs2.real
+	-rm *.o
+
+rootnnfs2.real:
+	OTHER_CFLAGS="-DROOTNNFS" ; export OTHER_CFLAGS ; $(MAKE) nnfs2 && mv nnfs2 rootnnfs2
+
+
+ftp:pgp
+	echo   "exco\n\
+		umask 022\n\
+		cd /vol/ftp/nnfs\n\
+		bin\n\
+		prompt no\n\
+		hash\n\
+		mdel *\n\
+		put ../nnfs-$(V).tar.gz nnfs-$(V).tar.gz\n\
+		put ../nnfs-$(V).tar.gz nnfs.tar.gz\n\
+		quit" | \
+	ftp ftp710.univ-lyon1.fr
+
+pgp:tar
+	cd .. ; \
+	pgp -sb nnfs-$(V).tar ; \
+	( \
+	echo "If you don't use PGP, untar the nnfs-$(V).tar" ; \
+	echo "If you use PGP, retrieve my Public key and type:" ; \
+	echo "	pgp nnfs-$(V).tar.asc nnfs-$(V).tar" ; \
+	echo "To verify the archive." ; \
+	) >>READMEpgp ; \
+	tar -cvf - READMEpgp nnfs-$(V).tar nnfs-$(V).tar.asc | \
+		gzip -9 >nnfs-$(V).tar.gz ;\
+	rm -f nnfs-$(V).tar nnfs-$(V).tar.asc READMEpgp ;
+
+create_defaults: nnfsrc_ gtkrc_
+
+nnfsrc_:/home/exco/.nnfs/nnfsrc
+	sed \
+	-e 's/CONFIRMATION=".*"/CONFIRMATION="always"/' \
+	-e 's/AUTO_START=".*"/AUTO_START="no"/' \
+	-e 's/[\\%]/&&/g' -e 's/"/\\"/g' \
+	-e 's/^/g_fprintf(f,"/' -e 's/$$/\\n") ;/' \
+	<$? >nnfsrc
+gtkrc_:/home/exco/.nnfs/gtkrc
+	sed -e 's/[\\%]/&&/g' -e 's/"/\\"/g' \
+	    -e 's/^/g_fprintf(f,"/' -e 's/$$/\\n") ;/' \
+         <$? >gtkrc
+
+clean:
+	-rm -f ../*~
+	-rm -rf *~ *.o nnfs2 rootnnfs2 TAGS config.* \
+	       nnfs.info nnfs.ps nnfs.dvi nnfs-$(V) *.bak
+	cd ../tst ; make clean
+
+depend:TAGS
+	makedepend $(CFLAGS) $(OBJ:.o=.c)
+TAGS:*.c *.h
+	-etags *.[ch]
+

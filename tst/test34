@@ -1,0 +1,56 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test a strange real case: directory of filtered files and symlink"
+
+runA -f $H/A
+runB -a $H/B
+
+
+echo '
+OUTPUT_FILTER="-regex=(\.(so|aux|log|dvi)|[~])$
+-regex=^\.nnfs/history/.*
+-regex=^dir/.*
+-type=d regex=^dor"' >>$H/A/.nnfs/nnfsrc
+cp $H/A/.nnfs/nnfsrc $H/B/.nnfs/nnfsrc
+
+
+mkdir $H/A/dir
+touch $H/A/dir/foo.o
+touch $H/A/dir/bar.o
+mkdir $H/A/dor
+touch $H/A/a_file
+
+runA
+runB
+
+[ ! -d $H/B/dir ] && Exit 1
+[ -d $H/B/dor ] && Exit 10
+
+rm -r $H/B/dir
+ln -s / $H/B/dir
+touch $H/B/dor
+
+runB
+touch $H/A/dir/foo.o
+touch $H/A/dir/bar.o
+runA
+
+[ ! -f $H/A/dor ] && Exit 11
+
+
+# The remote change wins
+
+samel $H/A dir $H/B dir || Exit 2
+
+
+
+Exit 0
+
+
+
+
+
+
+

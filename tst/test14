@@ -1,0 +1,37 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Initialisation with 2 hosts"
+
+touch $H/A/On_A
+touch $H/B/On_B
+touch $H/A/A_newer_than_B ; stamp 05 $H/A/A_newer_than_B
+touch $H/B/A_newer_than_B ; stamp 04 $H/B/A_newer_than_B
+touch $H/A/B_newer_than_A ; stamp 04 $H/A/B_newer_than_A
+touch $H/B/B_newer_than_A ; stamp 05 $H/B/B_newer_than_A
+
+runA -f $H/A
+runB -a $H/B
+[ ! -f $H/B/On_B ] && Exit 100
+[ -f $H/B/.nnfs/history ] && Exit 200
+
+runA
+[ ! -f $H/A/On_A ] && Exit 101
+[ ! -d $H/A/.nnfs/history ] && Exit 201
+[ ! -f $H/A/.nnfs/history/*/*/B_newer_than_A ] && Exit 202
+[   -f $H/A/.nnfs/history/*/*/A_newer_than_B ] && Exit 203
+same $H/A On_B $H/B On_B || Exit 102
+same $H/A B_newer_than_A $H/B B_newer_than_A || Exit 103
+same $H/A A_newer_than_B $H/B A_newer_than_B && Exit 104
+
+runB
+[ ! -d $H/B/.nnfs/history ] && Exit 204
+[ ! -f $H/B/.nnfs/history/*/*/A_newer_than_B ] && Exit 205
+[   -f $H/B/.nnfs/history/*/*/B_newer_than_A ] && Exit 205
+same $H/A On_A $H/B On_A || Exit 105
+same $H/A A_newer_than_B $H/B A_newer_than_B || Exit 106
+
+
+
+Exit 0

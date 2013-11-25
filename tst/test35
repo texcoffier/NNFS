@@ -1,0 +1,76 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Conflicting filtered files become non-filtered"
+
+runA -f $H/A
+runB -a $H/B
+
+echo "1"> $H/B/no-conflict-1.o
+echo "1"> $H/B/no-conflict-2.o
+echo "1"> $H/B/no-conflict-3.o
+echo "1"> $H/B/conflict-1.o
+echo "1"> $H/B/conflict-2.o
+echo "1"> $H/B/conflict-3.o
+runB
+sleep 1
+echo "2"> $H/A/conflict-1.o
+echo "2"> $H/A/conflict-2.o
+echo "2"> $H/A/conflict-3.o
+runA
+sleep 1
+echo "2"> $H/A/no-conflict-1.o
+echo "2"> $H/A/no-conflict-2.o
+echo "3"> $H/A/conflict-1.o
+echo "3"> $H/A/conflict-2.o
+runA
+sleep 1
+echo "4"> $H/B/conflict-1.o
+echo "4"> $H/B/conflict-2.o
+runB
+sleep 1
+echo "3"> $H/B/no-conflict-1.o
+echo "5"> $H/B/conflict-1.o
+runB
+
+echo '
+OUTPUT_FILTER="-regex=(\.(so|aux|log|dvi)|[~])$
+-regex=^\.nnfs/history/.*"' >>$H/A/.nnfs/nnfsrc
+cp $H/A/.nnfs/nnfsrc $H/B/.nnfs/nnfsrc
+
+# The up to date files are moved
+
+runA
+runB
+runA
+
+[ `cat $H/A/no-conflict-1.o` -ne 3 ] && Exit 1
+[ `cat $H/B/no-conflict-1.o` -ne 3 ] && Exit 2
+
+[ `cat $H/A/no-conflict-2.o` -ne 2 ] && Exit 3
+[ `cat $H/B/no-conflict-2.o` -ne 2 ] && Exit 4
+
+[ `cat $H/A/no-conflict-3.o` -ne 1 ] && Exit 5
+[ `cat $H/B/no-conflict-3.o` -ne 1 ] && Exit 6
+
+[ `cat $H/A/conflict-1.o` -ne 5 ] && Exit 7
+[ `cat $H/B/conflict-1.o` -ne 5 ] && Exit 8
+
+[ `cat $H/A/conflict-2.o` -ne 4 ] && Exit 9
+[ `cat $H/B/conflict-2.o` -ne 4 ] && Exit 10
+
+[ `cat $H/A/conflict-3.o` -ne 2 ] && Exit 11
+[ `cat $H/B/conflict-3.o` -ne 2 ] && Exit 12
+
+
+
+
+Exit 0
+
+
+
+
+
+
+

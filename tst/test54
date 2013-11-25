@@ -1,0 +1,142 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test mode changing with MODE_CHANGE_SENSITIVE=no"
+
+echo "MODE_CHANGE_SENSITIVE=no
+" >>$H/A/.nnfs/nnfsrc
+echo "MODE_CHANGE_SENSITIVE=no
+" >>$H/B/.nnfs/nnfsrc
+
+runA -f $H/A
+runB -a $H/B
+
+echo "AAAAAAAAAA" > $H/A/afile1
+echo "BBBBBBBBBB" > $H/A/afile2
+echo "CCCCCCCCCC" > $H/A/afile3
+echo "DDDDDDDDDD" > $H/A/afile4
+echo "EEEEEEEEEE" > $H/A/afile5
+echo "FFFFFFFFFF" > $H/A/afile6
+
+echo "AAAAAAAAAA" > $H/A/bfile1
+echo "BBBBBBBBBB" > $H/A/bfile2
+echo "CCCCCCCCCC" > $H/A/bfile3
+echo "DDDDDDDDDD" > $H/A/bfile4
+echo "EEEEEEEEEE" > $H/A/bfile5
+echo "FFFFFFFFFF" > $H/A/bfile6
+
+runA
+runB
+
+chmod 640 $H/A/afile1
+chmod 640 $H/B/bfile1
+runA
+chmod 640 $H/A/afile2
+chmod 640 $H/B/bfile2
+runA
+chmod 640 $H/A/afile3
+chmod 640 $H/B/bfile3
+runB
+chmod 640 $H/A/afile4
+chmod 640 $H/B/bfile4
+runB
+chmod 640 $H/A/afile5
+chmod 640 $H/B/bfile5
+runA
+chmod 640 $H/A/afile6
+chmod 640 $H/B/bfile6
+runB
+runA
+runB
+runA
+
+for I in $(cd $H/A ; echo [ab]*)
+do
+  if same $H/A $I $H/B $I
+      then
+      echo $I
+      Exit 1
+      fi
+done
+
+echo "X" >>$H/A/afile1
+echo "X" >>$H/B/bfile1
+runA
+echo "X" >>$H/A/afile2
+echo "X" >>$H/B/bfile2
+runA
+echo "X" >>$H/A/afile3
+echo "X" >>$H/B/bfile3
+runB
+echo "X" >>$H/A/afile4
+echo "X" >>$H/B/bfile4
+runB
+echo "X" >>$H/A/afile5
+echo "X" >>$H/B/bfile5
+runA
+echo "X" >>$H/A/afile6
+echo "X" >>$H/B/bfile6
+runB
+runA
+runB
+
+for I in $(cd $H/A ; echo [ab]*)
+do
+  if same $H/A $I $H/B $I
+      then
+      :
+      else
+      echo
+      ls -ls $H/[AB]/$I
+      Exit 2
+      fi
+done
+
+chmod 600 $H/A/afile1
+echo "X" >> $H/B/afile1
+runA
+runB
+runA
+same $H/A afile1 $H/B afile1 || Exit 3
+
+chmod 600 $H/A/afile2
+echo "X" >> $H/B/afile2
+runB
+runA
+runB
+same $H/A afile2 $H/B afile2 || Exit 4
+
+chmod 600 $H/A/afile3
+stamp 05 $H/B/afile3
+runA
+runB
+runA
+same $H/A afile3 $H/B afile3 || Exit 5
+
+chmod 600 $H/A/afile4
+stamp 05 $H/B/afile4
+runB
+runA
+runB
+same $H/A afile4 $H/B afile4 || Exit 6
+
+
+chmod 700   $H/B/afile2
+echo "Y" >> $H/B/afile1
+chmod 700   $H/B/afile4
+echo "Z" >> $H/B/afile3
+runB --exec_after_merge `pwd`/test54chmod
+runA
+runB
+runA
+
+same $H/A afile1 $H/B afile1 && Exit 7
+same $H/A afile2 $H/B afile2 || Exit 8
+same $H/A afile3 $H/B afile3 && Exit 9
+same $H/A afile4 $H/B afile4 || Exit 10
+same $H/A afile5 $H/B afile5 && Exit 11
+same $H/A afile6 $H/B afile6 || Exit 12
+
+Exit 0
+

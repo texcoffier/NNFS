@@ -1,0 +1,57 @@
+#!/bin/sh
+
+I=-1
+# The last digit is 9 for maximum trace and 0 for minimum
+TRACE="*#*#9"
+DUMP=" "
+export TRACE DUMP
+unset DISPLAY
+
+if [ "root" = "$1" ]
+then
+  ROOT=root
+  shift
+else
+  ROOT=
+fi
+
+if [ "valgrind" = "$1" ]
+then
+  export STRACE="valgrind --num-callers=10"
+  export STRACE="valgrind --num-callers=10 --alignment=8"
+  shift
+else
+  export STRACE=""
+fi
+
+if [ "" != "$1" ]
+then
+  I=$1
+fi
+while [ -f test$I -o -f test${I}root ]
+do
+  if [ -f test$I$ROOT ]
+  then
+    rm TMP/* 2>/dev/null >&1
+    ./test$I$ROOT
+    if [ $? != 0 ]
+    then
+      E="$E
+      Bug in 'test$I'"
+    fi
+    if [ "" != "$STRACE" ]
+    	then
+	grep "==[1-9][0-9]*==" TMP/*[!.]
+	read AAAA
+	fi
+  fi
+  I=`expr $I + 1`
+done
+
+if [ "" != "$E" ]
+then
+  echo "$E"
+else
+  echo "GOOD : All the tests run fine"
+fi
+

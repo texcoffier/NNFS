@@ -1,0 +1,62 @@
+------------------------------
+NNFS Non Networked File System
+------------------------------
+
+The documentation is in "doc/nnfs.html"
+
+---------
+---------
+COMPILING
+---------
+---------
+
+To compile nnfs2
+	cd src
+	./configure
+	make clean
+	make
+	cp nnfs2 /usr/local/bin
+
+If you want to compile rootnnfs2 (UID/GID mirroring)
+	cd src
+	./configure
+	make clean
+	make rootnnfs
+	cp rootnnfs2 /usr/local/bin
+
+---------
+---------
+TESTING
+---------
+---------
+
+Not useful for Linux/x86 because it was tested for years.
+For other system I will be happy to have feedback.
+
+To test nnfs2 as a normal user.
+	cd tst
+	tests
+If you know the root password, you can run some more test.
+I think it is not a good idea for you to use these tests.
+	tests root
+
+---------
+---------
+  TODO
+---------
+---------
+
+It works perfectly for me and I am tired of this program.
+I think I will no more work on NNFS,
+so if somebody else want to take the flame.
+
+QUESTIONS:
+	- Add a filter for file to historize?
+	- Add a filter for file to read?
+	- Add option TMP_FILE=file name?
+
+
+
+
+
+

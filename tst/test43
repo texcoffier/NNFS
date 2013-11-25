@@ -1,0 +1,43 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test hard link copy option"
+
+runA -f $H/A
+runB -a $H/B
+
+
+touch $H/A/file1
+ln $H/A/file1 $H/A/file2
+runA
+runB
+[ -f $H/B/file1 ] && Exit 1
+[ -f $H/B/file2 ] && Exit 2
+
+
+echo 'COPY_HARD_LINK="yes"' >>$H/A/.nnfs/nnfsrc
+runA
+runB
+[ ! -f $H/B/file1 ] && Exit 3
+[ ! -f $H/B/file2 ] && Exit 4
+
+date >$H/B/file1
+runB
+runA
+
+same $H/A file1 $H/B file1 || Exit 5
+
+#
+# This test will not work if hard link are write protected
+#
+same $H/A file2 $H/A file1 && Exit 6
+
+
+
+
+
+
+
+Exit 0
+

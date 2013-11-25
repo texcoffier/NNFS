@@ -1,0 +1,62 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Transformation between file and directory"
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir $H/A/dir
+stamp 01 $H/A/dir
+echo "a-content" > $H/A/dir/a
+stamp 02 $H/A/dir/a
+runA
+runB
+
+rm -r $H/B/dir
+echo "dir-content" >$H/B/dir
+runB
+runA
+same $H/A dir $H/B dir || Exit 2
+
+rm $H/A/dir
+mkdir $H/A/dir
+stamp 02 $H/A/dir
+runA
+runB
+same $H/A dir $H/B dir || Exit 3
+
+mkdir $H/A/dir/dir
+mkdir $H/A/dir/dir/dir
+stamp 03 $H/A/dir/dir
+stamp 04 $H/A/dir/dir/dir
+mkdir $H/B/dir/dor
+mkdir $H/B/dir/dor/dir
+stamp 05 $H/B/dir/dor
+stamp 06 $H/B/dir/dor/dir
+runB
+runA
+same $H/A/dir dor $H/B/dir dor || Exit 4
+same $H/A/dir/dor dir $H/B/dir/dor dir || Exit 5
+runB
+same $H/A/dir dir $H/B/dir dir || Exit 6
+same $H/A/dir/dir dir $H/B/dir/dir dir || Exit 7
+
+rm -r $H/B/dir/dir $H/B/dir/dor
+echo "file" >$H/B/dir/dir
+echo "file2" >$H/B/dir/dor
+runB
+runA
+same $H/A/dir dor $H/B/dir dor || Exit 8
+same $H/A/dir dir $H/B/dir dir || Exit 9
+rm -r $H/A/dir
+echo "file3" >$H/A/dir
+runA
+runB
+same $H/A dir $H/B dir || Exit 10
+
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

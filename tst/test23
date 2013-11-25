@@ -1,0 +1,133 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** The user remove files while NNFS is running"
+
+
+touch $H/A/file0
+mkdir $H/A/empty_dir
+mkdir $H/A/normal_dir
+touch $H/A/normal_dir/file1
+touch $H/A/deleted_file
+mkdir $H/A/deleted_dir
+touch $H/A/deleted_dir/file2
+
+touch $H/A/file_fcA
+mkdir $H/A/empty_dir_coA
+mkdir $H/A/change_on_A_normal_dir
+touch $H/A/change_on_A_normal_dir/file3
+mkdir $H/A/normal_dir_fcA
+touch $H/A/normal_dir_fcA/file_change_on_A
+
+touch $H/A/file_fcB
+mkdir $H/A/empty_dir_coB
+mkdir $H/A/change_on_B_normal_dir
+touch $H/A/change_on_B_normal_dir/file4
+mkdir $H/A/normal_dir_fcB
+touch $H/A/normal_dir_fcB/file_change_on_B
+
+touch $H/A/file_fcAB
+mkdir $H/A/empty_dir_coAB
+mkdir $H/A/change_on_AB_normal_dir
+touch $H/A/change_on_AB_normal_dir/file5
+mkdir $H/A/normal_dir_fcAB
+touch $H/A/normal_dir_fcAB/file_change_on_AB
+
+runA -f $H/A
+runB -a $H/B
+runA
+runB
+
+( cd /tmp/NNFShome/A ; ls -lsR ) >xxx
+( cd /tmp/NNFShome/B ; ls -lsR ) >yyy
+if diff xxx yyy
+	then
+	:
+	else
+	Exit 100
+	fi
+
+stamp 01 $H/A/file_fcA
+echo boo >$H/B/file_fcB
+stamp 02 $H/B/file_fcB
+stamp 03 $H/A/file_fcAB
+stamp 04 $H/B/file_fcAB
+stamp 05 $H/A/empty_dir_coA
+stamp 06 $H/B/empty_dir_coB
+stamp 07 $H/A/empty_dir_coAB
+stamp 08 $H/B/empty_dir_coAB
+stamp 09 $H/A/change_on_A_normal_dir
+stamp 10 $H/B/change_on_B_normal_dir
+stamp 11 $H/A/change_on_AB_normal_dir
+stamp 12 $H/B/change_on_AB_normal_dir
+stamp 13 $H/A/normal_dir_fcA/file_change_on_A
+stamp 14 $H/B/normal_dir_fcB/file_change_on_B
+stamp 15 $H/A/normal_dir_fcAB/file_change_on_AB
+stamp 16 $H/B/normal_dir_fcAB/file_change_on_AB
+rm -rf $H/B/deleted*
+touch $H/B/created_file
+mkdir $H/B/created_dir
+touch $H/B/created_dir/file7
+
+
+runA
+yes | runB --exec_after_merge `pwd`/test23rm
+
+same $H/A file_fcA $H/B file_fcA || Exit 101
+same $H/A file_fcB $H/B file_fcB && Exit 111
+[ -d $H/B/normal_dir ] && Exit 121
+[ -d $H/B/normal_dir_fcB ] && Exit 131
+[ -d $H/B/normal_dir_fcA ] && Exit 141
+[ -d $H/B/normal_dir_fcAB ] && Exit 151
+[ -d $H/B/change_on_A_normal_dir ] && Exit 161
+[ -d $H/B/change_on_AB_normal_dir ] && Exit 171
+[ -d $H/B/change_on_B_normal_dir ] && Exit 181
+
+# some change goes from B to A
+
+runA
+
+[ -d $H/A/.nnfs/history/*/* ] && Exit 102
+[ -d $H/A/delete_dir ] && Exit 112
+[ -f $H/A/delete_file ] && Exit 122
+[ -f $H/A/delete_file ] && Exit 132
+[ -f $H/A/created_file ] && Exit 142
+[ ! -d $H/A/created_dir ] && Exit 152
+[ -f $H/A/created_dir/file7 ] && Exit 162
+
+# some files are retrieved on B
+
+runB
+
+[ -f $H/B/file0 ] && Exit 200
+[ -d $H/B/empty_dir ] && Exit 201
+[ -d $H/B/normal_dir ] && Exit 202
+[ ! -d $H/B/normal_dir_fcA ] && Exit 203
+[ ! -d $H/B/normal_dir_fcAB ] && Exit 204
+[ ! -d $H/B/change_on_A_normal_dir ] && Exit 205
+[ ! -d $H/B/change_on_AB_normal_dir ] && Exit 206
+[ -d $H/B/normal_dir_fcB ] && Exit 207
+[ -d $H/B/change_on_B_normal_dir ] && Exit 208
+
+#  Now identical because no change on A and
+# all the previous changes are yet on B
+
+runA
+
+
+# On HPUX, empty directories created with "mkdir" shell command
+# have a size of 1024 and the ones created with "mkdir" system call
+# have a size of 24
+
+( cd /tmp/NNFShome/A ; ls -lsR ) | awk '{ if ( $2 == "drwxr-xr-x" ) print $1 $2 $3 $4 $5 $7 $8 $9 $10 ; }' >xxx
+( cd /tmp/NNFShome/B ; ls -lsR ) | awk '{ if ( $2 == "drwxr-xr-x" ) print $1 $2 $3 $4 $5 $7 $8 $9 $10 ; }' >yyy
+if diff xxx yyy
+	then
+	:
+	else
+	Exit 105
+	fi
+
+
+Exit 0

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+. ./init_test
+
+echo 'MEDIUM_SIZE="20"' >>$H/A/.nnfs/nnfsrc 
+
+echo "*** Read an NNFS file system on multiple medium (may fail,its normal)"
+runA -f $H/A
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK" ] && Exit 13
+rm $M/ejected
+
+runA
+
+# ls -ls $M/exco.AAK
+
+[ "`cat $M/ejected`" != "exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+---
+exco.AAA
+exco.AAB
+exco.AAC
+exco.AAD
+exco.AAE
+exco.AAF
+exco.AAG
+exco.AAH
+exco.AAI
+exco.AAJ
+exco.AAK" ] && Exit 14
+
+Exit 0

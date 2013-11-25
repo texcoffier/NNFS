@@ -1,0 +1,42 @@
+#!/bin/sh
+
+
+if [ `id -nu` != root ]
+        then
+        echo "This script must be run by root"
+        su -c "cd `pwd` ; $0"
+        exit
+        fi
+
+. ./init_test
+
+echo "*** Test cross mount point"
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir $H/A/mnt
+./loop mount TMP/A $H/A/mnt >TMP/loopA.log 2>&1
+touch $H/A/mnt/foo
+
+runA
+runB
+
+[ -f $H/B/mnt/foo ] && Exit 1
+[ -d $H/B/mnt ] && Exit 2
+
+echo 'CROSS_MOUNT_POINT="yes"' >>$H/A/.nnfs/nnfsrc
+
+runA
+runB
+
+[ ! -f $H/B/mnt/foo ] && Exit 3
+[ ! -d $H/B/mnt ] && Exit 4
+
+
+./loop umount TMP/A $H/A/mnt
+make clean 2>/dev/null >&2
+
+
+Exit 0
+

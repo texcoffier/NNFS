@@ -1,0 +1,34 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test very normal case with run on the same host"
+
+runA -f $H/A
+runB -a $H/B
+
+echo AA > $H/A/a ; stamp 01 $H/A/a
+echo AB > $H/A/b ; stamp 02 $H/A/b
+echo AC > $H/A/c ; stamp 03 $H/A/c
+runA
+touch $H/A/a ; stamp 04 $H/A/a
+runA
+rm $H/A/a
+runA
+[ -f $H/A/a ] && Exit 1
+rm $H/A/b
+runA
+[ -f $H/A/a ] && Exit 2
+[ -f $H/A/b ] && Exit 3
+touch $H/A/a ; stamp 07 $H/A/a
+runA
+[ ! -f $H/A/a ] && Exit 4
+
+runB
+[ -f $H/B/b ] && Exit 5
+same $H/A a $H/B a || Exit 6
+same $H/A c $H/B c || Exit 7
+
+[ -d $H/A/.nnfs/history ] && Exit 254
+[ -d $H/B/.nnfs/history ] && Exit 254
+Exit 0

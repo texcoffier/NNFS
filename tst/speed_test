@@ -1,0 +1,26 @@
+#!/bin/sh
+
+. ./init_test
+HH=$HOME
+HOME=$H/A
+
+echo "*** Speed test"
+
+echo "First run to initialise"
+../src/nnfs2 --no-x11 --host A --add-first $HH >TMP/1 >$TOP/tst/TMP/1.
+
+echo "Second run without option"
+T1=`date +"%s"`
+../src/nnfs2 --no-x11 --host A 2>TMP/2 >TMP/2.
+T2=`date +"%s"`
+echo "Number of seconds : `expr $T2 - $T1`"
+
+echo "Third run with  option"
+T1=`date +"%s"`
+../src/nnfs2.nodebug --no-x11 --host A 2>TMP/3 >TMP/3.
+T2=`date +"%s"`
+echo "Number of seconds : `expr $T2 - $T1`"
+
+
+
+Exit 0

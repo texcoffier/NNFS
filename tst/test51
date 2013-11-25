@@ -1,0 +1,38 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test zombi directories (need the DEBUG compile option)"
+
+runA -f $H/A
+runB -a $H/B
+
+mkdir "$H/A/dir"
+mkdir "$H/A/dir/dir"
+touch "$H/A/dir/file"
+touch "$H/A/dir/dir/file"
+stamp 05 "$H/A/dir"
+stamp 05 "$H/A/dir/file"
+stamp 05 "$H/A/dir/dir"
+stamp 05 "$H/A/dir/dir/file"
+
+runB
+
+stamp 06 "$H/A/dir"
+stamp 06 "$H/A/dir/file"
+stamp 06 "$H/A/dir/dir"
+stamp 06 "$H/A/dir/dir/file"
+touch "$H/A/dir/dir/fil2"
+
+
+yes | runA --exec_after_merge `pwd`/test51touch
+
+rm -r "$H/A/dir"
+
+runA
+
+[ -d "$H/A/dir" ] && Exit 1
+
+
+Exit 0
+

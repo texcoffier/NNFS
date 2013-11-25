@@ -1,0 +1,9 @@
+#!/bin/sh
+# -*- ksh -*-
+
+touch "$H/A/dir/file"
+touch "$H/A/dir/dir/file"
+
+touch "$H/A/dir/dir/fil"
+# rm "$H/A/dir/dir/fil"
+

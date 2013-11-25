@@ -1,0 +1,108 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** Test number of bytes to put on medium"
+
+size() { N=`cat number` ; fgrep "to compress and write on medium" <TMP/`expr $N - 1`. |
+    ( read A B C ; echo $B ) ; }
+expect_size() { if [ `size` -ne $1 ]
+	then
+	echo "Bad size `size` instead of $1" ;
+	Exit `cat number` ;
+	fi ;
+}
+
+runA -f $H/A
+runB -a $H/B
+
+echo > $H/B/file1
+runB
+expect_size 1
+
+echo "2" > $H/B/file2
+runB
+expect_size 3
+
+echo "222" > $H/A/file4
+runA
+expect_size 4
+
+rm $H/A/file1
+runA
+expect_size 04
+
+runB
+expect_size 0
+
+mkdir $H/B/toto
+echo "333333" >$H/B/toto/file7
+touch $H/B/file0
+runB
+expect_size 7
+
+sleep 1
+touch $H/A/file2
+touch $H/A/file4
+runA
+expect_size 6
+
+chmod 777 $H/A/toto
+rm $H/A/file*
+runA
+expect_size 00
+
+echo "foo.o" >$H/A/foo.o
+echo "mode000" >$H/A/mode000
+chmod 000 $H/A/mode000
+echo "hardlink" >$H/A/hardlink
+ln $H/A/hardlink $H/A/hardlink_
+runA
+expect_size 000
+
+runB
+[ -f $H/B/mode000 ] && Exit 100
+[ -f $H/B/hardlink ] && Exit 101
+[ -f $H/B/foo.o ] && Exit 102
+expect_size 0000
+
+echo "more" >>$H/A/foo.o
+echo "more" >>$H/A/hardlink_
+chmod 600 $H/A/mode000
+echo "more" >>$H/A/mode000
+chmod 000 $H/A/mode000
+runA
+expect_size 00000
+
+chmod 600 $H/A/mode000
+rm $H/A/hardlink_
+runA
+expect_size 27
+
+runA
+expect_size 027
+
+ln -s toto $H/A/symbolic_link_to_toto
+runA
+expect_size 31
+
+ln -s file1 $H/A/symbolic_link_to_file1_non_existant
+runA
+expect_size 36
+
+ln -s file2 $H/A/symbolic_link_to_file2
+runA
+expect_size 41
+
+
+
+
+
+Exit 0
+
+
+
+
+
+
+
