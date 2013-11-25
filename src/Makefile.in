@@ -84,7 +84,11 @@ clean:
 	cd ../tst ; make clean
 
 depend:TAGS
-	makedepend $(CFLAGS) $(OBJ:.o=.c)
+	$(CC) -MM `echo $(CFLAGS) | sed 's/-W[^ ]* //g'` $(INCLUDES) $(OBJ:.o=.c)  >Makefile.dep
+	@# makedepend $(CFLAGS) $(OBJ:.o=.c)
+
+include Makefile.dep
+
 TAGS:*.c *.h
 	-etags *.[ch]
 

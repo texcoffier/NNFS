@@ -151,6 +151,7 @@ AC_SUBST(OTHER_O)
 
 AC_OUTPUT(Makefile)
 
+touch Makefile.dep
 make depend
 
 test "$GZIP" = "no" &&
