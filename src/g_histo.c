@@ -61,7 +61,8 @@ if ( g_rename(old,new) )
 	  }
 	/* Try to make a copy */
 	err = g_Copy_File(old, new) ;
-	(void)g_remove(old) ;
+	if ( ! err )
+	  (void)g_remove(old) ;
 	break ;
       }
   }
@@ -74,7 +75,6 @@ char * G_FUNCTION(g_History_Dir,(const char* nnfs, const char* format))
 
 char *d ;
 time_t t ;
-
 G_PF("Fomart = %s\n",format) ;
 
 G_MALLOC(d,strlen(nnfs)+1+2*strlen(format)+1) ;

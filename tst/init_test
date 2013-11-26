@@ -91,7 +91,7 @@ if [ "" = "$1" ]
       if [ -d $I ]
       then
 	# Chown -Rf `logname` $I
-        chmod 777 $I $I/* $I/*/* $I/*/*/* $I/*/*/*/* 2>/dev/null >&2 || true
+        chmod -R 777 $I 2>/dev/null >&2 || true
 	rm -rf $I
       fi
       mkdir $I

@@ -2,7 +2,7 @@
 
 . ./init_test
 
-echo "*** Test is NNFS works with a bad history directory"
+echo "*** Test if NNFS works with a bad history directory"
 
 if [ $(id -u) = 0 ]
 then
@@ -17,13 +17,14 @@ echo "AAAAAAAAAA" > $H/A/f
 runA
 runB
 
-# rmdir $H/B/.nnfs/history
-ln -s /usr/nnfstest $H/B/.nnfs/history
+ln -s /usr/nonexistentdir $H/B/.nnfs/history
+echo "HISTORIZE=yes" >>$H/B/.nnfs/nnfsrc
+
 echo "BBBBBBBB" > $H/A/f
 
 runA
 runB
 
-same $H/A f $H/B f || Exit 1
+same $H/A f $H/B f || Exit 101
 
 Exit 0
