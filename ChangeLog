@@ -1,3 +1,9 @@
+2.1.9 ===> 2.1.10 (2013/11/27)
+	If the history directory was not writable, then all the
+	synchronized files are destroyed.
+	So, you must upgrade to this release to avoid file loss.
+	The compilation warnings of GCC 4.6.3 have been fixed.
+
 2.1.8 ===> 2.1.9 (2006/02/02)
 	Fix the case where MODE_CHANGE_SENSITIVE==no and a file mode
 	is modified while NNFS is running.
@@ -6,20 +12,20 @@
 	Configuration can now be saved with GTK 2.6 GUI
 	Directory with mode r-x can now be synchronized without write error
 	The default option is to not synchronize r-w directory content
-	
+
 2.1.6 ===> 2.1.7 (2005/04/24 ===> 2005/05/10)
 	Error reporting fix (patch from Alexander Bergolth)
 	Remove compilation warnings from gcc 3.3.5
 	Enhance test11 and test46 to make it work on fast hosts
 	Add some information about the MEDIUM_SIZE limitation to 2Gb
 	NNFSRC: Add erasing of the files on the medium before writing on it
-	
+
 2.1.5 ===> 2.1.6 (2004/02/12 ===> 2004/02/26)
 	GUI changed : more information displayed on files in a sortable table.
 	Add the option "mode_change_sensitive".
 	Graphic interface use now GTK 2.
 	Some Makefile cleanup.
-	
+
 2.1.4 ===> 2.1.5 (2003/12/14 ===> 2003/12/14)
 	Fix "core dump" when "stat" call fails, e.g.: file bigger than 4Gb
 	Beware, these files are not mirrored.
@@ -89,7 +95,4 @@
 1       (1995/07/22)
 	It was a bunch of shell scripts.
 
-
-
-	
 

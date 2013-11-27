@@ -1,12 +1,11 @@
 #!/usr/bin/python
 
-old = "2.1.8"
-new = "2.1.9"
+old = "2.1.9"
+new = "2.1.10"
 
 for i in [ \
            ["Version"            , old         , new         ], \
            ["Welcome.html"       , old         , new         ], \
-           ["src/Makefile"       , old         , new         ], \
            ]:
 
     try:

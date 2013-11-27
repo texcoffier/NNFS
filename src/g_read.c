@@ -1,5 +1,5 @@
 /*    NNFS: Non-Networked File System.
- *    Copyright (C) 1995-2005  Thierry EXCOFFIER (exco@ligim.univ-lyon1.fr)
+ *    Copyright (C) 1995-2013  Thierry EXCOFFIER (exco@ligim.univ-lyon1.fr)
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
