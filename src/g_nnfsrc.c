@@ -328,7 +328,8 @@ char *g_Case_Name(const char *hostname)
   */
   strcpy(named, hostname) ;
   h = g_popen("echo .`uname`","r");
-  fgets(named+strlen(named), sizeof(named), h) ;
+  if ( fgets(named+strlen(named), sizeof(named), h) == NULL )
+    PERROR("fgets") ;
   g_pclose(h) ;
   named[strlen(named)-1] = '\0' ;      
 
@@ -402,7 +403,6 @@ void g_Nnfsrc_Action(char *name,
   char named[G_LINE_CHUNK] ;
   char *current_case ;
   char *tmp ;
-  g_Boolean insert ;
 
   f = g_fopen(name, "r") ;
 
@@ -410,7 +410,6 @@ void g_Nnfsrc_Action(char *name,
   *in_case_found = g_False ;
   *nb_cases = 0 ;
   G_MALLOC(*cases,1) ;
-  insert = g_False ;
 
   if ( g == NULL )
     for(i=0;vt[i].name;i++)
@@ -485,7 +484,8 @@ void g_Nnfsrc_Action(char *name,
 		    {
 		      /* Do not store this old value */
 		      fseek(g, -i-2, SEEK_CUR) ;
-		      fgets(named, sizeof(named), f) ;
+		      if ( fgets(named, sizeof(named), f) == NULL )
+			PERROR("fgets") ;
 		      for(;;)
 			{
 			  if ( fgets(named, sizeof(named), f) == NULL )
@@ -535,7 +535,8 @@ void g_Nnfsrc_Action(char *name,
 		   && strncmp(named, "case", 4) == 0
 		   )
 		{
-		  fgets(named, sizeof(named), f) ;
+		  if ( fgets(named, sizeof(named), f) == NULL )
+		    PERROR("fgets") ;
 		  fprintf(g, "%s", named) ;
 		  g_Nnfsrc_Insert_Case(g, hostname, vt) ;
 		  goto start_of_line ;
@@ -681,7 +682,7 @@ if ( f )
 
 if ( errno != ENOENT )
 	{
-	perror(nnfsrc) ;
+	PERROR(nnfsrc) ;
 	G_EXIT(1) ;
 	}
 

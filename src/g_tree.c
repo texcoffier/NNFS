@@ -367,7 +367,7 @@ if ( a->local_to_nnfs && !a->filtered
 			a->write_error = g_Error_Read_Link ;
 			a->error = ERROR_NUMBER ;
 			g_fprintf(nnfs->state.output, "1\n?") ;
-                        perror(nnfs->state.name) ;
+                        PERROR(nnfs->state.name) ;
 			}
 		else
 			{
@@ -529,7 +529,7 @@ if ( a->need_time_stamp )
 	t.modtime = a->hosts[a->up_to_date].date ;
 	if ( utime(nnfs->state.name, &t) )
 		{
-                perror(nnfs->state.name) ;
+                PERROR(nnfs->state.name) ;
                 fprintf(stderr, "NNFS: Error setting file date\n") ;
 		a->error = ERROR_NUMBER ;
 		a->read_error = g_Error_Get_Time ;
@@ -547,7 +547,7 @@ if ( a->read_file_info )	/* Only for Symbolics links */
 	G_PF("Reread ALL file informations\n") ;
 	if ( lstat( nnfs->state.name, &st ) )
 		{
-                perror(nnfs->state.name) ;
+                PERROR(nnfs->state.name) ;
                 fprintf(stderr, "NNFS: Error reading file informations\n") ;
 		a->read_error = g_Error_Lstat ;
                 g_Time_Stamp_A_File(nnfs, a) ;
@@ -567,7 +567,7 @@ if ( a->read_file_info )	/* Only for Symbolics links */
                    }
                 else
                    {
-                      perror(nnfs->state.name) ;
+                      PERROR(nnfs->state.name) ;
                       fprintf(stderr,
 	                      "NNFS: file type changed while reading\n") ;
                       a->read_error    = g_Error_Type_Change_While_Read ;

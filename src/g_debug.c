@@ -256,9 +256,9 @@ g_Signal(g_Signal_User2,g_Read_Debug_Args_From_File) ;
 
 sprintf(filename,"/tmp/g_debug.%d",(int)getpid()) ;
 f = fopen(filename,"r") ;
-IF ( f==0 )
+IF ( f == NULL )
 	{
-	perror("g_Read_Debug") ;
+	PERROR("g_Read_Debug") ;
 	G_RETURN(;) ;
 	}
 while( fgets(activity,FILENAMEmax,f)!=0 )

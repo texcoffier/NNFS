@@ -100,7 +100,8 @@ static void eject_medium_from_the_floppy(const char *eject)
 			  medium_in_the_floppy,
 			  medium_in_the_floppy,
 			  medium_in_the_floppy) ;
-  system(b) ;
+  if ( system(b) )
+    PERROR(b) ;
   g_Free(b) ;
   not_the_good_medium() ;
 }

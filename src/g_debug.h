@@ -24,6 +24,10 @@
 
 extern int g_Printf(const char *format, ...) ;
 
+#define PERROR(X) do { g_Printf("\n%s:%d\n",__FILE__,__LINE__) ;perror(X); } \
+  while(0)
+
+
 #ifdef G_DEBUG
 
 void		g_Debug_List() ;

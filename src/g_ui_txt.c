@@ -46,7 +46,8 @@ static void G_FUNCTION(ask_medium,(int answer))
       if ( i )
 	{
 	  uanswer = G_ABORT_READING ;
-	  write(answer,&uanswer,1) ;
+	  if ( write(answer,&uanswer,1) != 1 )
+	    PERROR("answer pipe stop") ;
 	  printf("NNFS: I stop operation on medium\n") ;
 	  G_PF("NNFS: I stop operation on medium\n") ;
 	  continue ;
@@ -55,7 +56,8 @@ static void G_FUNCTION(ask_medium,(int answer))
       if ( i )
 	{
 	  uanswer = G_CONTINUE ;
-	  write(answer,&uanswer,1) ;
+	  if ( write(answer,&uanswer,1) != 1 )
+	    PERROR("answer pipe continue") ;
 	  printf("NNFS: I continue operation on medium\n") ;
 	  G_PF("NNFS: I continue operation on medium\n") ;
 	  continue ;
@@ -145,7 +147,8 @@ switch(*buf++)
 		printf("NNFS: Hit RETURN when problem is corrected") ;
 		fflush(stdout) ;
 		while( getchar() != '\n' ) { }
-		write(answer,"",1) ;
+		if ( write(answer,"",1) != 1 )
+		  PERROR("answer pipe flush") ;
                 break ;
 	case G_STATS:
 		printf("\n") ;
@@ -209,20 +212,23 @@ switch(*buf++)
 		   {
 			case 'e':
 			case 'E':
-				write(answer,"e",1) ;
+			        if ( write(answer,"e",1) != 1 )
+				  PERROR("answer pipe exit") ;
 				printf("NNFS: OK, I exit") ;
 				G_PF("Answer E\n") ;
 				G_RETURN(;) ;
 			case 'c':
 			case 'C':
-				write(answer,"c",1) ;
+			        if ( write(answer,"c",1) != 1 )
+				  PERROR("answer pipe cont") ;
 				printf("NNFS: OK, I continue the update") ;
 				G_PF("Answer C\n") ;
 				G_RETURN(;) ;
 			case 'v':
 			case 'V':
 				sprintf(command,"more %s", buf) ;
-				system(command) ;
+				if ( system(command) )
+				  PERROR(system) ;
 				G_PF("Answer V\n") ;
 				break ;
 		   }
@@ -313,7 +319,8 @@ for(;mainp>=0||medium>=0||error>=0;)
 			error = -1 ;
 			continue ;
 			}
-		write(2,buf,nb) ;
+		if ( write(2,buf,nb) != nb )
+		  PERROR("stderr") ; /* LOL */
 		G_PF("Errors printed\n") ;
 		continue ;
 		}

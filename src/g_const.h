@@ -64,6 +64,9 @@
 #define ERRNO_MAX  (1<<(ERRNO_BITS-1))
 #define ERROR_NUMBER ((errno>ERRNO_MAX || errno<0) ? ERRNO_MAX-1 : errno)
 
+#ifdef G_FILE
+#undef G_FILE
+#endif
 
 #define G_SET_DISPLAY_BAR     'S'
 #define G_BAR		      'B'

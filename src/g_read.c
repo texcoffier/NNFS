@@ -440,7 +440,7 @@ if ( a->nnfs_to_local )
          */
      		if ( lchown(tmp_name, a->hosts[a->up_to_date_on_medium].uid,
 		  a->hosts[a->up_to_date_on_medium].gid) )
-                           perror("lchown") ;
+                           PERROR("lchown") ;
                }
 #endif
 #endif

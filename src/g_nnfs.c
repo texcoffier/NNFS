@@ -291,7 +291,7 @@ g_Finish_Display_Bar() ;
  */
 if ( lstat(".", &st) )
   {
-    perror(".") ;
+    PERROR(".") ;
     exit(25) ;
   }
 g_Stat_To_File_On_Host(&st, &nnfs.state.nnfs->hosts[nnfs.header.nb_fs], &nnfs.config) ;
@@ -314,7 +314,8 @@ else
 g_Finish_Display_Bar() ;
 dumping(&nnfs) ;
 if ( nnfs.options.exec_after_merge )
-  system( nnfs.options.exec_after_merge ) ;
+  if ( system( nnfs.options.exec_after_merge ) )
+    PERROR(nnfs.options.exec_after_merge) ;
 nnfs.header.nb_files = g_Nb_Files(&nnfs) ;
 /*
  * Go on

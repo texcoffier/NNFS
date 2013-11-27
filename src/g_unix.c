@@ -170,7 +170,7 @@ char *pc ;
 
 if ( gethostname(hn,G_HOSTNAME_LEN) )
   {
-  perror("gethostname") ;
+  PERROR("gethostname") ;
   exit(52) ;
   }
 strcat(hn,".") ;
@@ -182,7 +182,8 @@ strcat(hn,".") ;
 
 #ifdef HAVE_GETDOMAINNAME
 pc = hn + strlen(hn) ;
-getdomainname( pc, G_HOSTNAME_LEN - (pc-hn) ) ;
+if ( getdomainname( pc, G_HOSTNAME_LEN - (pc-hn) ) )
+  PERROR("getdomainname") ;
 if ( strcmp(pc, "(none)") == 0 )
      pc[0] = '\0' ;
 #else
@@ -223,7 +224,7 @@ if (
 #endif
  )
 {
-perror(file) ;
+PERROR(file) ;
 G_EXIT(1) ;
 }
 
@@ -488,6 +489,7 @@ void g_exit_verbose(int v)
   g_Printf("PID %d Children of %d\n", getpid(), getppid()) ;
 
   sprintf(c, "cat /proc/%d/status | fgrep kB >&2", getpid()) ;
-  system(c) ;
+  if ( system(c) )
+    PERROR(c) ;
   _exit(v) ;
 }

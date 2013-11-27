@@ -261,7 +261,8 @@ void add_nickname(GtkWidget *widget, gpointer data)
   c[0] = G_ADD_NICKNAME ;
   c[1] = (int)data+1 ;
   c[2] = 0 ;
-  write(ganswer, c, 3) ;
+  if ( write(ganswer, c, 3) != 3 )
+    PERROR("ganswer") ;
   unsensitivize_all() ;
   empty_table() ;
 }
@@ -332,7 +333,8 @@ void format_function()
 
   unsensitivize_all() ;
   c = G_FORMAT ;
-  write(ganswer,&c,1) ;
+  if ( write(ganswer,&c,1) != 1 )
+    PERROR("ganswer") ;
 }
 
 GtkWidget *frame_label_button(char* frame_name, char *label_content,
@@ -922,7 +924,7 @@ void save_config()
   if ( g == NULL )
     {
       g_Printf("Can't write new configuration") ;
-      perror(new_file_name) ;
+      PERROR(new_file_name) ;
       return ;
     }
   tables = pages[search_page("Setup")].tables ;
@@ -942,13 +944,13 @@ void save_config()
   if ( rename(gconfig->nnfsrc, old_file_name) )
     {
       g_Printf("Error renaming %s to %s\n", gconfig->nnfsrc, old_file_name) ;
-      perror(old_file_name) ;
+      PERROR(old_file_name) ;
     }
 
   if ( rename(new_file_name, gconfig->nnfsrc) )
     {
       g_Printf("Error renaming %s to %s\n", new_file_name, gconfig->nnfsrc) ;
-      perror(new_file_name) ;
+      PERROR(new_file_name) ;
     }
 
   gtk_main_quit ();
@@ -1159,7 +1161,8 @@ void continue_update()
   char c ;
 
   c = G_CONTINUE ;
-  write(ganswer,&c,1) ;
+  if ( write(ganswer,&c,1) != 1 )
+    PERROR("ganswer") ;
   unsensitivize_all() ;
   if ( can_not_write )
     {
@@ -1305,14 +1308,16 @@ void answer_function1()
 {
   char c ;
   c = G_CONTINUE ;
-  write(ganswer, &c, 1) ;
+  if ( write(ganswer, &c, 1) != 1 )
+    PERROR("ganswer") ;
   delete_medium_page() ;
 }
 void answer_function0()
 {
   char c ;
   c = G_ABORT_READING ;
-  write(ganswer, &c, 1) ;
+  if ( write(ganswer, &c, 1) != 1 )
+    PERROR("ganswer") ;
   delete_medium_page() ;
 }
 
@@ -1497,9 +1502,11 @@ void set_directory(GtkWidget *widget)
   char c ;
 
   c = G_ADD_HOST ;
-  write(ganswer, &c, 1) ;
+  if ( write(ganswer, &c, 1) != 1 )
+    PERROR("ganswer") ;
   h = gtk_entry_get_text( GTK_ENTRY(widget) ) ;
-  write(ganswer,h, strlen(h)+1) ;
+  if ( write(ganswer,h, strlen(h)+1) != strlen(h)+1 )
+    PERROR("ganswer") ;
   unsensitivize_all() ;
   empty_table() ;
 }
@@ -1918,7 +1925,7 @@ void g_Ui_GTK(int mainp, int medium, int error, int answer, pid_t fils,int *argc
       f = fopen(gtkrc, "w") ;
       if ( f == NULL )
 	{
-	  perror(gtkrc) ;
+	  PERROR(gtkrc) ;
 	  exit(50) ;
 	}
 #include "gtkrc"

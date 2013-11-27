@@ -57,7 +57,7 @@ if ( g_rename(old,new) )
 	if ( errno != EXDEV ) /* On the same device */
 	  {
 	    g_Printf("Error renaming %s to %s\n",old, new) ;
-	    perror("rename") ;
+	    PERROR("rename") ;
 	  }
 	/* Try to make a copy */
 	err = g_Copy_File(old, new) ;

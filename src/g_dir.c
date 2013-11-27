@@ -162,7 +162,8 @@ void G_FUNCTION(g_Pipe_Directory,(FILE *output, char *name))
 	      g_Free(new_name) ;
 	      if ( chdir("..") )
 		{
-		  (void)chdir(name) ;
+		  if ( chdir(name) )
+		    PERROR(name) ;
 		}
 	    }
 	}

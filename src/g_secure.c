@@ -56,7 +56,7 @@ void g_fclose(FILE *f)
 {
 if ( fclose(f) )
 	{
-	perror("On fclose") ;
+	PERROR("On fclose") ;
 	exit(30) ;
 	}
 }
@@ -67,7 +67,7 @@ FILE *f ;
 f = popen(file,mode) ;
 if ( f == NULL )
 	{
-	perror(file) ;
+	PERROR(file) ;
 	exit(31) ;
 	}
 return(f) ;
@@ -77,7 +77,7 @@ void g_pclose(FILE *f)
 {
 if ( pclose(f) )
   {
-    perror("On pclose") ;
+    PERROR("On pclose") ;
     exit(32) ;
   }
 }
@@ -86,7 +86,7 @@ void g_chmod(const char* nom, int mode)
 {
 if ( chmod(nom, mode) )
 	{
-	perror(nom) ;
+	PERROR(nom) ;
 	exit(34) ;
 	}
 }
@@ -96,7 +96,7 @@ void g_chdir(const char* nom)
 {
 if ( chdir(nom) )
 	{
-	perror(nom) ;
+	PERROR(nom) ;
 	exit(35) ;
 	}
 }
@@ -105,7 +105,7 @@ void g_pipe(int fildes[2])
 {
 if ( pipe(fildes) )
 	{
-	perror("Pipe open") ;
+	PERROR("Pipe open") ;
 	exit(36) ;
 	}
 }
@@ -118,7 +118,7 @@ fflush(stderr) ;
 i = fork() ;
 if ( i<0 )
 	{
-	perror("Fork") ;
+	PERROR("Fork") ;
 	exit(37) ;
 	}
 else
@@ -143,7 +143,7 @@ void g_fprintf(FILE *f, const char *format, ...)
   if ( vfprintf( f, format, ap ) <= 0 )
 	{
 	g_Printf("Format = %s\n", format) ;
-	perror("On fprintf") ;
+	PERROR("On fprintf") ;
 	exit(38) ;
 	}
   va_end(ap);
@@ -334,7 +334,7 @@ int l ;
 l = fread(buffer, t, u, f) ;
 if ( l<0 )
 	{
-	perror("fread") ;
+	PERROR("fread") ;
 	exit(44) ;
 	}
 return(l) ;
@@ -348,7 +348,7 @@ int g_read(int fildes, char *buffer, int size)
 {
   if ( read(fildes, buffer, size) != size )
     {
-      perror("read") ;
+      PERROR("read") ;
       exit(45) ;
     }
   return(size) ;
@@ -420,14 +420,14 @@ int g_symlink(const char *value, const char *name)
   r = symlink(value, name) ;
   if ( r )
     {
-    perror(value);
+    PERROR(value);
     fprintf(stderr, "errno = %d\n", errno);
     }
   if ( r && (errno == EACCES ))
     G_TMP_WRITE(name, r = symlink(value, name)) ;
   if ( r )
     {
-    perror(value);
+    PERROR(value);
     fprintf(stderr, "errno2 = %d\n", errno);
     }
   return r ;
@@ -496,7 +496,7 @@ if ( f == NULL && mode[0] == 'w' && (errno == EACCES && sync_readonly_dir) )
 /*
 if ( f == NULL )
 	{
-	perror(file) ;
+	PERROR(file) ;
 	exit(29) ;
 	}
 */
