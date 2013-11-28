@@ -65,23 +65,8 @@ pgp:tar
 
 create_defaults: nnfsrc_ gtkrc_
 
-nnfsrc_:/home/exco/.nnfs/nnfsrc
-	sed \
-	-e 's/CONFIRMATION=".*"/CONFIRMATION="always"/' \
-	-e 's/AUTO_START=".*"/AUTO_START="no"/' \
-	-e 's/[\\%]/&&/g' -e 's/"/\\"/g' \
-	-e 's/^/g_fprintf(f,"/' -e 's/$$/\\n") ;/' \
-	<$? >nnfsrc
-gtkrc_:/home/exco/.nnfs/gtkrc
-	sed -e 's/[\\%]/&&/g' -e 's/"/\\"/g' \
-	    -e 's/^/g_fprintf(f,"/' -e 's/$$/\\n") ;/' \
-         <$? >gtkrc
-
 clean:
-	-rm -f ../*~
-	-rm -rf *~ *.o nnfs2 rootnnfs2 TAGS config.* \
-	       nnfs.info nnfs.ps nnfs.dvi nnfs-$(V) *.bak
-	cd ../tst ; make clean
+	-rm -rf *.o nnfs2 rootnnfs2 TAGS config.* *.bak
 
 depend:TAGS
 	$(CC) -MM `echo $(CFLAGS) | sed 's/-W[^ ]* //g'` $(INCLUDES) $(OBJ:.o=.c)  >Makefile.dep
