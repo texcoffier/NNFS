@@ -476,7 +476,6 @@ void G_FUNCTION(g_Read_A_File,(g_NNFS *nnfs, g_File_Info *a))
 
 G_PF("name = %s on-medium=%d state=%d\n", nnfs->state.name, a->on_medium,
 		nnfs->state.read_error) ;
-fprintf(stderr,"\n\nread:%s\n", nnfs->state.name);
 
 if ( !a->on_medium )
   G_RETURN(;) ;
