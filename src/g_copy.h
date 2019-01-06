@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include "g_type.h"
 
-g_Boolean  g_Copy_Stream  (FILE *r, FILE *w, int nb) ;
+g_Boolean  g_Copy_Stream  (FILE *r, FILE *w, long nb) ;
 g_Boolean  g_Copy_File  (const char*old, const char* new) ;
 
 #endif

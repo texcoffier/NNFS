@@ -38,7 +38,7 @@
  *
  */
 
-g_Boolean G_FUNCTION(g_Copy_Stream,(FILE *r, FILE *w, int nb))
+g_Boolean G_FUNCTION(g_Copy_Stream,(FILE *r, FILE *w, long nb))
 
 char buf[G_LINE_CHUNK] ;
 g_Boolean err ;

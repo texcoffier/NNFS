@@ -37,8 +37,8 @@ struct g_Filter
   int perm ;
   int minus_perm ;
   int plus_perm ;
-  int plus_size ;
-  int minus_size ;
+  long plus_size ;
+  long minus_size ;
   g_Type_Of_File type ;
   regex_t name ;
   char *regex ;

@@ -323,7 +323,8 @@ if ( a->local_to_nnfs && !a->filtered
 	{
 	case g_Is_A_File :
 		r = fopen(nnfs->state.name,"r") ;
-		G_PF("Open %s = %p\n", nnfs->state.name, r) ;
+		G_PF("Open %s = %p (%ld)\n", nnfs->state.name, r,
+		     a->hosts[nnfs->header.fs_id].size) ;
 		if ( r )
 		   {
 		   if ( g_Copy_Stream(r, nnfs->state.output,
