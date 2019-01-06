@@ -42,6 +42,20 @@ I think it is not a good idea for you to use these tests.
 
 ---------
 ---------
+DEBUGGING
+---------
+---------
+
+Edit 'Makefile.in' to enable debugging and recompile all.
+
+The it is possible to show all debug messages by adding the argument:
+		'*#*#255'
+
+See g_debug.c to have the syntaxe details
+
+
+---------
+---------
   TODO
 ---------
 ---------

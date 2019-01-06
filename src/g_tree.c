@@ -303,7 +303,7 @@ void G_FUNCTION(g_Write_A_File,(g_NNFS *nnfs, g_File_Info *a))
 int size ;
 FILE *r ;
 int i ;
-char buf[G_LINE_CHUNK] ;
+char buf[10*G_LINE_CHUNK] ;
 
 /* old version
 if ( a->local_to_nnfs && !a->filtered && !a->read_error)
