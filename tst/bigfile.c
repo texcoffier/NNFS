@@ -9,7 +9,7 @@ int main(int argc, char **argv)
   for(i=0; i<6; i++)
     if ( fseek(stdout, 1000000000, SEEK_CUR) )
       {
-	perror("Creating a 6Gb file\n") ;
+	perror("Creating a 6Gb file") ;
 	return 1 ;
       }
 

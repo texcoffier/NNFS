@@ -9,7 +9,7 @@ include ../Version
 
 
 # Uncomment to include all debugging informations and memory checkers
-# DEBUG="-DG_DEBUG"
+# DEBUG=-DG_DEBUG -ggdb
 
 CFLAGS=-O $(OTHER_CFLAGS) @CFLAGS@ $(DEBUG) -DNNFS_VERSION=\"Version:$(V)\" @DEFS@
 

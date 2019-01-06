@@ -23,12 +23,12 @@
 #include "g_debug.h"
 
 static void ** global_pointers = NULL ;
-static int global_first_free = -1 ; /* Indices in global_pointers */
+static long global_first_free = -1 ; /* Indices in global_pointers */
 static int global_pointers_size = 0 ;
 
 #define PF if (0) g_Printf
 
-#define Index int
+#define Index long
 
 static int the_index(void *p)
 {
@@ -98,7 +98,7 @@ void *g_Malloc(unsigned int n)
 
   v = (char*)v + sizeof(Index) ;
   
-  PF("First free = %d\n",  global_first_free) ;
+  PF("First free = %ld\n",  global_first_free) ;
 
   if (  global_first_free < 0 )
     {
@@ -109,7 +109,7 @@ void *g_Malloc(unsigned int n)
 				, sizeof(*global_pointers)*global_pointers_size) ;
       PF("change global_pointers after=%p\n", global_pointers) ;
       for(i=nb; i<global_pointers_size; i++)
-	global_pointers[i] = (void*)(i+1) ;
+	global_pointers[i] = (void*)(i+1l) ;
       global_pointers[global_pointers_size-1] = (void*)-1 ;
 
       global_first_free = nb ;
@@ -119,7 +119,7 @@ void *g_Malloc(unsigned int n)
 
   PF("set index\n", global_pointers) ;
   i = global_first_free ;
-  global_first_free = (int)global_pointers[global_first_free] ;  
+  global_first_free = (int)(long)global_pointers[global_first_free] ;
   global_pointers[ i ] = v ;
   ((Index*)v)[-1] = i ;
 
@@ -145,7 +145,7 @@ g_Boolean g_Is_Memory_Clean()
 
   PF("memory clean ?\n") ;
   nb = 0 ;
-  for(i=global_first_free; i!=-1; i = (int)global_pointers[i] )
+  for(i=global_first_free; i!=-1; i = (int)(long)global_pointers[i] )
     {
       nb++ ;
     }

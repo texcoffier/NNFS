@@ -35,7 +35,7 @@ For other system I will be happy to have feedback.
 
 To test nnfs2 as a normal user.
 	cd tst
-	tests
+	./tests
 If you know the root password, you can run some more test.
 I think it is not a good idea for you to use these tests.
 	tests root

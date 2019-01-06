@@ -141,10 +141,10 @@ for(i=0;i<nb;i++)
 	g_Printf("strt %d " , table[i]->start) ;
 	g_Printf("end %d "  , table[i]->end) ;
 	g_Printf("in %d\n"  , table[i]->nb_in) ;
-	g_Printf("startingcall (%s) endingcall (%s) itself %d\n",
+	g_Printf("startingcall (%s) endingcall (%s) itself %p\n",
 				table[i]->starting,
 				table[i]->ending,
-				(int)table[i]->itself) ;
+				table[i]->itself) ;
 	}
 
 if ( j==1 )

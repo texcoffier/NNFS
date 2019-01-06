@@ -106,9 +106,9 @@ if ( f->to_historize )
 				 nnfs->config.history,
 				 strncmp(nnfs->state.name,"./",2)
 				 ? nnfs->state.name : nnfs->state.name+2) ;
-  G_PF("new_name=%x (%s)\n", (int)new_name, new_name) ;
+  G_PF("new_name=%p (%s)\n", new_name, new_name) ;
   err = g_Rename( nnfs->state.name, new_name) ;
-  G_PF("new_name=%x (%s)\n", (int)new_name, new_name) ;
+  G_PF("new_name=%p (%s)\n", new_name, new_name) ;
   g_Free(new_name) ;
   f->to_historize = g_False ;
 }

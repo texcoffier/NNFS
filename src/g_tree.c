@@ -156,11 +156,11 @@ if ( nnfs->state.dir->to_delete && !f->to_delete )
 if ( f->to_delete     ) nnfs->state.nb_to_delete++ ;
 if ( f->local_to_nnfs
      && !f->filtered
-     && !f->hosts[f->up_to_date].type != g_Is_A_Directory
+     && (!f->hosts[f->up_to_date].type) != g_Is_A_Directory
      ) nnfs->state.nb_local_to_nnfs++ ;
 if ( f->nnfs_to_local
      && !f->to_delete
-     && !f->hosts[f->up_to_date].type != g_Is_A_Directory
+     && (!f->hosts[f->up_to_date].type) != g_Is_A_Directory
      ) nnfs->state.nb_nnfs_to_local++ ;
 if ( f->local_change  ) nnfs->state.nb_local_change++ ;
 if ( f->nnfs_change   ) nnfs->state.nb_nnfs_change++ ;
@@ -195,7 +195,7 @@ if ( strcmp( nnfs->state.name, "." ) )
   if ( f->nnfs_to_local || f->local_to_nnfs || f->to_delete || f->conflict )
     {
       fprintf(nnfs->state.logfile, 
-	      "%c%c%c%c%c%c%c %s\n",
+	      "%c%c%c%c%c%c%c %s\n%s",
 	      f->nnfs_to_local ? 'R' : ' ',
 	      f->local_to_nnfs ? 'W' : ' ',
 	      f->to_delete     ? 'D' : ' ',
@@ -203,8 +203,8 @@ if ( strcmp( nnfs->state.name, "." ) )
 	      f->nnfs_filtered ? 'f' : ' ',
 	      f->filtered      ? 'F' : ' ',
 	      f->to_historize  ? 'H' : ' ',
-	      nnfs->state.name+2) ;
-      fprintf(nnfs->state.logfile, g_other_file_info(nnfs->header.nb_fs, f,1)) ;
+	      nnfs->state.name+2,
+	      g_other_file_info(nnfs->header.nb_fs, f,1)) ;
   }
 }
 
@@ -323,7 +323,7 @@ if ( a->local_to_nnfs && !a->filtered
 	{
 	case g_Is_A_File :
 		r = fopen(nnfs->state.name,"r") ;
-		G_PF("Open %s = %d\n", nnfs->state.name,(int)r) ;
+		G_PF("Open %s = %p\n", nnfs->state.name, r) ;
 		if ( r )
 		   {
 		   if ( g_Copy_Stream(r, nnfs->state.output,

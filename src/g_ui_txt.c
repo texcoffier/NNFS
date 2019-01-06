@@ -228,7 +228,7 @@ switch(*buf++)
 			case 'V':
 				sprintf(command,"more %s", buf) ;
 				if ( system(command) )
-				  PERROR(system) ;
+				  PERROR(command) ;
 				G_PF("Answer V\n") ;
 				break ;
 		   }
