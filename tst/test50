@@ -6,6 +6,8 @@ echo "*** Test file not synchronization on change mode only"
 
 echo "MODE_CHANGE_SENSITIVE=no
 " >>$H/A/.nnfs/nnfsrc
+echo "MODE_CHANGE_SENSITIVE=no
+" >>$H/B/.nnfs/nnfsrc
 
 runA -f $H/A
 runB -a $H/B

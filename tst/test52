@@ -5,6 +5,7 @@
 echo "*** Test directories with r-x mode and --- mode"
 
 echo "SYNC_READONLY_DIR=yes" >>$H/A/.nnfs/nnfsrc
+echo "SYNC_READONLY_DIR=yes" >>$H/B/.nnfs/nnfsrc
 runA -f $H/A
 runB -a $H/B
 
