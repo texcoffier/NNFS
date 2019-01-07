@@ -14,7 +14,8 @@ touch $H/A/f1
 runA
 runB
 
-[ -f $H/B/bigfile ] && Exit 1
+[ "$(ls -l $H/A/bigfile | sed 's/ [^ ]*$//')" != \
+  "$(ls -l $H/B/bigfile | sed 's/ [^ ]*$//')" ] && Exit 1
 same $H/A f1      $H/B f1      || Exit 2
 
 

@@ -74,7 +74,7 @@ void g_Display_Nnfs_File(const g_File_On_Host *f)
     {
     case G_DATE_DELETED_FILE: g_Printf("Del.file") ; break ;
     case G_DATE_FILTRED_FILE: g_Printf("Fil.file") ; break ;
-    default                 : g_Printf("%8lx", f->date) ; break ;
+    default                 : g_Printf("%9lx", f->date) ; break ;
     }
   g_Printf(" size=%8lx", f->size) ;
 #ifdef ROOTNNFS

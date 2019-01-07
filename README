@@ -49,9 +49,9 @@ DEBUGGING
 Edit 'Makefile.in' to enable debugging and recompile all.
 
 The it is possible to show all debug messages by adding the argument:
-		'*#*#255'
+		'*#*#9'
 
-See g_debug.c to have the syntaxe details
+See g_debug.c to have the syntax details
 
 
 ---------

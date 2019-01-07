@@ -42,10 +42,10 @@
  *
  */
 
-g_Nnfs_Error G_FUNCTION(g_Read_Integer,(FILE *f, int* value))
+g_Nnfs_Error G_FUNCTION(g_Read_Integer,(FILE *f, long* value))
 
 int c ;
-if ( fscanf(f, "%d", value) != 1 )
+if ( fscanf(f, "%ld", value) != 1 )
   {
     if ( G_VERBOSE )
       {
@@ -59,7 +59,7 @@ if ( c != '\n' )
   {
     if ( G_VERBOSE )
       {
-	G_PRINTF("c=%c(%d) value=%d\n",c,c,*value) ;
+	G_PRINTF("c=%c(%d) value=%ld\n",c,c,*value) ;
 	g_Copy_Stream(f, stderr, 80) ;
       }
     G_RETURN(g_Error_Read) ;
@@ -71,7 +71,7 @@ G_RETURN(g_No_Error) ;
  *
  */
 
-g_Nnfs_Error G_FUNCTION(g_Jump_Over,(FILE *input, int size))
+g_Nnfs_Error G_FUNCTION(g_Jump_Over,(FILE *input, long size))
 
 char buf[G_LINE_CHUNK] ;
 int len, read_len ;
@@ -154,7 +154,7 @@ G_RETURN(;) ;
 
 
 void G_FUNCTION(g_Copy_The_File,
-                (g_NNFS *nnfs, FILE *w, int size, g_File_Info *a))
+                (g_NNFS *nnfs, FILE *w, long size, g_File_Info *a))
 
 int n, l, wrote ;
 char buf[G_LINE_CHUNK] ;
@@ -209,10 +209,10 @@ void G_FUNCTION(g_Read_Normal_File,(g_NNFS *nnfs, g_File_Info *a))
 
 char *tmp_name ;
 FILE *w ;
-int size, err ;
+long size, err ;
 
 size = a->hosts[a->up_to_date_on_medium].size ;
-G_PF("Name=%s Size=%d\n", nnfs->state.name, size) ;
+G_PF("Name=%s Size=%ld\n", nnfs->state.name, size) ;
 
 w = NULL ;
 if ( a->nnfs_to_local )
@@ -383,7 +383,7 @@ G_RETURN(;) ;
 void G_FUNCTION(g_Read_Symbolic_File,(g_NNFS *nnfs, g_File_Info *a))
 
 char buf[G_LINE_CHUNK] ;
-int size, error ;
+long size, error ;
 char *tmp_name ;
 
 G_PF("Name=%s\n", nnfs->state.name) ;
