@@ -1,5 +1,5 @@
 /*    NNFS: Non-Networked File System.
- *    Copyright (C) 1998-2005  Thierry EXCOFFIER (exco@ligim.univ-lyon1.fr)
+ *    Copyright (C) 1998-2019  Thierry EXCOFFIER (exco@ligim.univ-lyon1.fr)
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -259,7 +259,7 @@ void add_nickname(GtkWidget *widget, gpointer data)
   char c[3] ;
 
   c[0] = G_ADD_NICKNAME ;
-  c[1] = (int)data+1 ;
+  c[1] = (long)data+1 ;
   c[2] = 0 ;
   if ( write(ganswer, c, 3) != 3 )
     PERROR("ganswer") ;
@@ -290,7 +290,7 @@ void fill_td(GtkWidget *table, int l, int c, char *txt, int left, int nbc)
 
 
 void fill_table(GtkWidget *table,
-		int l, char *host, char *dir, char *nb, char *date, char *ch)
+		long l, char *host, char *dir, char *nb, char *date, char *ch)
 {
   GtkWidget *but ;
   char tmp[G_LINE_CHUNK] ;
@@ -392,7 +392,7 @@ GtkWidget *frame_label_button(char* frame_name, char *label_content,
  *
  */
 
-GtkWidget *notebook_label(const char *labeltext, int page, const char *tip)
+GtkWidget *notebook_label(const char *labeltext, long page, const char *tip)
 {
   GtkWidget *label, *eb ;
 
@@ -489,7 +489,7 @@ GtkWidget *welcome_page(int i)
   c = g_Formatted_Strings("% %", /* the space should be here */
      "NNFS: Non-Networked File System.\n"
      NNFS_VERSION "\n"
-     "Copyright (C) 1995-2005  Thierry EXCOFFIER (exco@liris.univ-lyon1.fr)\n"
+     "Copyright (C) 1995-2019 Thierry EXCOFFIER (thierry.excoffier@univ-lyon1.fr)\n"
      "\n"
      "This program is free software; you can redistribute it and/or modify\n"
      "it under the terms of the GNU General Public License as published by\n"
@@ -569,7 +569,7 @@ GtkWidget* create_texts(char *t[10][2])
   return(menu) ;
 }
 
-void fill_a_case(GtkWidget *table, GtkWidget *w, int line, int column,
+void fill_a_case(GtkWidget *table, GtkWidget *w, long line, long column,
 		 const char *tip)
 {
   gtk_tooltips_set_tip(tips, w, tip, NULL) ;
@@ -764,10 +764,10 @@ void retrieve_filter_values(GtkWidget *w, char *m[100][8])
   int line, column ;
   char *s ;
 
-  line = (int)gtk_object_get_data(GTK_OBJECT(w), "nnfs2_l") ;
+  line = (long)gtk_object_get_data(GTK_OBJECT(w), "nnfs2_l") ;
   if ( line < 1 )
     return ;
-  column = (int)gtk_object_get_data(GTK_OBJECT(w), "nnfs2_c") ;
+  column = (long)gtk_object_get_data(GTK_OBJECT(w), "nnfs2_c") ;
 
   if  ( GTK_IS_EDITABLE(w) )
     {
@@ -795,7 +795,7 @@ void retrieve_values(GtkWidget *w, void *unused)
   GtkTextBuffer *text_buffer ;
   GtkTextIter start_iter, end_iter ;
 
-  m = (int)gtk_object_get_data(GTK_OBJECT(w), "nnfs2") - 1 ;
+  m = (long)gtk_object_get_data(GTK_OBJECT(w), "nnfs2") - 1 ;
   if ( m < 0 )
     return ;
 
@@ -1034,7 +1034,7 @@ void set_config_widget(char *named)
 
 	  gtk_tooltips_set_tip(tips, entry, v[m].tip, NULL) ;
 
-	  gtk_object_set_data(GTK_OBJECT(entry), "nnfs2", (gpointer)(m+1)) ;
+	  gtk_object_set_data(GTK_OBJECT(entry), "nnfs2", (gpointer)(long)(m+1)) ;
 	  gtk_table_attach( GTK_TABLE(tables[k]), entry, 1,2, m,m+1,
 			    (GtkAttachOptions)(GTK_FILL|GTK_EXPAND),VO,0,0) ; 
 	}
@@ -1178,8 +1178,8 @@ gint row_compare(GtkTreeModel *model,
 {
   GValue value_a = {0}, value_b = {0} ;
 
-  gtk_tree_model_get_value(model, a, (int)user_data /* column */, &value_a) ;
-  gtk_tree_model_get_value(model, b, (int)user_data /* column */, &value_b) ;
+  gtk_tree_model_get_value(model, a, (long)user_data /* column */, &value_a) ;
+  gtk_tree_model_get_value(model, b, (long)user_data /* column */, &value_b) ;
 
   return strcmp(value_a.data[0].v_pointer, value_b.data[0].v_pointer) ;
 }
@@ -1207,7 +1207,7 @@ void column_clicked(GtkTreeViewColumn *tvc, gpointer data)
 
   gtk_tree_sortable_set_sort_func
     ( GTK_TREE_SORTABLE(pages[search_page("Question")].list),
-      (int)data,
+      (long)data,
       row_compare,
       data,
       NULL /* gtkDestroyNotify */
@@ -1219,7 +1219,7 @@ void column_clicked(GtkTreeViewColumn *tvc, gpointer data)
 
   gtk_tree_sortable_set_sort_column_id
     (GTK_TREE_SORTABLE(pages[search_page("Question")].list),
-     (int)data,
+     (long)data,
      dir[direction]
      ) ;
 
@@ -1232,7 +1232,7 @@ GtkWidget *question_page(int i)
 {
   GtkWidget *list, *title, *scrolled_window ;
   GtkTreeViewColumn *tvc ;
-  int c ;
+  long c ;
   char *name[] = { "?", "Mode", "Size", "Modification date", "Filename" } ;
 
   pages[i].list = gtk_list_store_new(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING) ;
