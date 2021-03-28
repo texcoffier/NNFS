@@ -38,7 +38,7 @@ mkdir $H/A/dir ; chown mail $H/A/dir ; chgrp daemon $H/A/dir
 
 # Symbolic link
 ln -s afile $H/A/.sl
-chown man $H/A/.sl ; chgrp adm $H/A/.sl
+chown --no-dereference man $H/A/.sl ; chgrp --no-dereference adm $H/A/.sl
 
 
 # Verify initial copy
