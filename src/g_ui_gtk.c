@@ -1457,7 +1457,7 @@ void add_list(GtkListStore *l, char *name, char *c, g_File_Info *f, int nbh)
 {
   char siz[30] ;		/* Could store a long long in decimal XXX */
   GtkTreeIter iter ;
-  char date[4+1+2+1+2+1+2+1+2+1+2+1], *name_utf8 ;
+  char date[72], *name_utf8 ;
   gsize bytes_read, bytes_written ;
   struct tm *tm ;
   int utd ;
