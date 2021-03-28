@@ -1,0 +1,15 @@
+*.o
+TAGS
+*.log
+*.status
+*.dep
+doc/nnfs.html
+src/Makefile
+src/configure
+tst/TMP
+tst/a.out
+tst/xxx
+tst/yyy
+tst/zzz
+tst/number
+nnfs2
