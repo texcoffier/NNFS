@@ -99,7 +99,7 @@ g_Boolean err ;
 fflush(stderr) ;
 
 err = g_False ;
-if ( f->hosts[nnfs->header.nb_fs].type != 100+g_Is_A_Deleted // test57
+if ( f->hosts[nnfs->header.nb_fs].type != g_Is_A_Deleted // test57
      && f->to_historize )
 {
   /* 06/08/97 +2 */

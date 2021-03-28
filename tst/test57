@@ -1,0 +1,25 @@
+#!/bin/sh
+
+. ./init_test
+
+echo "*** A conflict between files and directory (yet another one)"
+
+runA -f $H/A
+runA
+
+runB -a $H/B
+runB
+echo "HISTORIZE=yes" >>$H/B/.nnfs/nnfsrc
+
+touch $H/A/foo
+runA
+runB
+
+rm $H/A/foo
+mkdir $H/A/foo
+touch $H/A/foo/bar
+runA
+runB
+
+Exit 0
+
