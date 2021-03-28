@@ -50,6 +50,12 @@ chmod 500 $H/A/dir1
 runA
 runB
 
+if ! grep 'g_secure.c:' TMP/$I >/dev/null
+    then
+    Exit 14
+    fi
+sed -i 's/g_secure.c:/&HIDE/' TMP/$I
+
 [ -f $H/B/dir1/file2 ] && Exit 6
 [ -d $H/B/dir1/dir3 ] && Exit 7
 [ -h $H/B/dir1/link1 ] && Exit 8

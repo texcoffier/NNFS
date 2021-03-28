@@ -63,6 +63,11 @@ echO() { echo -n "$*" ; }
     then
       A=255
     fi
+    if grep ':[1-9][0-9]*$' TMP/*
+    then
+      echo "See TMP"
+      A=254
+    fi
     if [ $A != 0 ]
     then
       echo "$0 ------------- Error $A -------------"
